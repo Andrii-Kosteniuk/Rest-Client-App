@@ -1,0 +1,13 @@
+package dev.homework.restclientapp;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+
+@SpringBootTest
+class RestCLientAppApplicationTests {
+
+    @Test
+    void contextLoads() {
+    }
+
+}
