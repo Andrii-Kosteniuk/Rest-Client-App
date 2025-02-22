@@ -11,8 +11,8 @@
     <groupId>dev.homework</groupId>
     <artifactId>Rest-CLient-App</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>Rest-CLient-App</name>
-    <description>Rest-CLient-App</description>
+    <name>Rest-Client-App</name>
+    <description>Rest-Client-App</description>
     <url/>
     <licenses>
         <license/>
@@ -40,6 +40,34 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.30</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>2.18.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.vaadin</groupId>
+            <artifactId>vaadin-spring-boot-starter</artifactId>
+            <version>24.6.5</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-logging</artifactId>
+        </dependency>
+
+
+
     </dependencies>
 
     <build>
