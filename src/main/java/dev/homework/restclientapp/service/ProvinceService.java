@@ -1,7 +1,7 @@
 package dev.homework.restclientapp.service;
 
-import dev.homework.restclientapp.dto.responce.district.CepikResponse;
-import dev.homework.restclientapp.dto.responce.district.DistrictRecord;
+import dev.homework.restclientapp.dto.response.province.CepikResponse;
+import dev.homework.restclientapp.dto.response.province.ProvinceRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -14,26 +14,26 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
-public class DistrictService {
-    private static final Logger logger = LoggerFactory.getLogger(DistrictService.class);
+public class ProvinceService {
+    private static final Logger logger = LoggerFactory.getLogger(ProvinceService.class);
 
     public final String BASE_URL = "https://api.cepik.gov.pl";
-    public final String URI_DISTRICTS = "/slowniki/wojewodztwa";
+    public final String URI_ProvinceS = "/slowniki/wojewodztwa";
 
     private final RestClient restClient;
 
-    public DistrictService() {
+    public ProvinceService() {
         restClient = RestClient.builder()
                 .baseUrl(BASE_URL)
                 .build();
     }
 
-    public List<String> getAllDistrictNames() {
-        logger.info("Fetching district names from API: {}", BASE_URL + URI_DISTRICTS);
+    public List<String> getAllProvinceNames() {
+        logger.info("Fetching province names from API: {}", BASE_URL + URI_ProvinceS);
 
         try {
             ResponseEntity<CepikResponse> response = restClient.get()
-                    .uri(URI_DISTRICTS)
+                    .uri(URI_ProvinceS)
                     .retrieve()
                     .toEntity(CepikResponse.class);
 
@@ -41,9 +41,9 @@ public class DistrictService {
                 logger.info("Successfully retrieved data from API");
                 return response.getBody().getData()
                         .getAttributes()
-                        .getDistrictRecords()
+                        .getProvinceRecords()
                         .stream()
-                        .map(DistrictRecord::getDistrictName)
+                        .map(ProvinceRecord::getProvinceName)
                         .toList();
             } else {
                 logger.warn("Received empty response from API");
@@ -55,8 +55,8 @@ public class DistrictService {
         return Collections.emptyList();
     }
 
-    public String getDistrictKey(String districtName) {
-        return switch (districtName) {
+    public String getProvinceKey(String ProvinceName) {
+        return switch (ProvinceName) {
             case "DOLNOŚLĄSKIE" -> "02";
             case "KUJAWSKO-POMORSKIE" -> "04";
             case "LUBELSKIE" -> "06";

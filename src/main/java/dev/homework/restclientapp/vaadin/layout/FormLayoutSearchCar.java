@@ -9,61 +9,62 @@ import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.spring.annotation.UIScope;
-import dev.homework.restclientapp.dto.request.CarSearchRequestDto;
-import dev.homework.restclientapp.dto.responce.car.Car;
-import dev.homework.restclientapp.service.CarService;
-import dev.homework.restclientapp.service.DistrictService;
+import dev.homework.restclientapp.dto.request.SearchVehiclesRequest;
+import dev.homework.restclientapp.dto.responce.car.Vehicle;
+import dev.homework.restclientapp.service.VehicleService;
+import dev.homework.restclientapp.service.ProvinceService;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
-@Route("/car-search")
-@PageTitle("Car Filter Form")
+@Route("/vehicles-search")
+@PageTitle("Vehicle Filter Form")
 @UIScope
 @Component
 public class FormLayoutSearchCar extends Div {
-    private final CarService carService;
-    private final DistrictService cepikService;
+    private final VehicleService vehicleService;
+    private final ProvinceService cepikService;
 
-    private final DatePicker dataOd = new DatePicker("Data od");
-    private final DatePicker dataDo = new DatePicker("Data do");
-    private final Grid<Car> carGrid = new Grid<>(Car.class);
+    private final DatePicker dateFrom = new DatePicker("Data od");
+    private final DatePicker dateTo = new DatePicker("Data do");
+    private final Grid<Vehicle> carGrid = new Grid<>(Vehicle.class);
     Select<String> selectWojewodztwo = new Select<>();
 
-    public FormLayoutSearchCar(CarService carService, DistrictService cepikService) {
-        this.carService = carService;
-        this.cepikService = cepikService;
+    public FormLayoutSearchCar(VehicleService vehicleService, ProvinceService provinceService) {
+        this.vehicleService = vehicleService;
+        this.cepikService = provinceService;
 
-        Button home = new Button("Go home", event -> getUI().ifPresent(ui -> ui.navigate("/home")));
-        Button submitButton = new Button("Search", e -> searchCars());
+        Button home = new Button("Go home", event -> getUI().ifPresent(ui -> ui.navigate("")));
+        Button submitButton = new Button("Search", e -> searchVehicles());
         FormLayout formLayout = new FormLayout();
 
-        selectWojewodztwo.setPlaceholder("Wybierz województwo");
+        selectWojewodztwo.setPlaceholder("Wybierz województwo...");
+        selectWojewodztwo.setLabel("Województwo");
 
-        List<String> allDistrictNames = cepikService.getAllDistrictNames();
+        List<String> allProvinceNames = provinceService.getAllProvinceNames();
 
 
-        selectWojewodztwo.setItems(allDistrictNames);
+        selectWojewodztwo.setItems(allProvinceNames);
 
-        formLayout.add(selectWojewodztwo, dataOd, dataDo, submitButton);
+        formLayout.add(selectWojewodztwo, dateFrom, dateTo, submitButton);
         formLayout.setColspan(submitButton, 3);
         formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1),
                 new FormLayout.ResponsiveStep("500px", 3));
 
 
-        carGrid.setColumns("marka", "model", "dataPierwszejRejestracji", "rokProdukcji");
+        carGrid.setColumns("mark", "model", "dateOfFirstRegistration", "yearOfProduction");
 
         add(home, formLayout, carGrid);
     }
 
-    private void searchCars() {
-        CarSearchRequestDto carSearchRequestDto = new CarSearchRequestDto();
-        carSearchRequestDto.setWojewodztwo(cepikService.getDistrictKey(selectWojewodztwo.getValue()));
-        carSearchRequestDto.setDataOd(dataOd.getValue() != null ? dataOd.getValue().toString().replace("-", "") : null);
-        carSearchRequestDto.setDataDo(dataDo.getValue() != null ? dataDo.getValue().toString().replace("-", "") : null);
+    private void searchVehicles() {
+        SearchVehiclesRequest searchVehiclesRequest = new SearchVehiclesRequest();
+        searchVehiclesRequest.setProvinceName(cepikService.getProvinceKey(selectWojewodztwo.getValue()));
+        searchVehiclesRequest.setDateFrom(dateFrom.getValue() != null ? dateFrom.getValue().toString().replace("-", "") : null);
+        searchVehiclesRequest.setDateTo(dateTo.getValue() != null ? dateTo.getValue().toString().replace("-", "") : null);
 
-        List<Car> cars = carService.getCarByModel(carSearchRequestDto);
-        carGrid.setItems(cars);
+        List<Vehicle> vehicles = vehicleService.getCarByModel(searchVehiclesRequest);
+        carGrid.setItems(vehicles);
     }
 
 

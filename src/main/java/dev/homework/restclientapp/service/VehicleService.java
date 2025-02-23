@@ -1,7 +1,7 @@
 package dev.homework.restclientapp.service;
 
-import dev.homework.restclientapp.dto.request.CarSearchRequestDto;
-import dev.homework.restclientapp.dto.responce.car.Car;
+import dev.homework.restclientapp.dto.request.SearchVehiclesRequest;
+import dev.homework.restclientapp.dto.responce.car.Vehicle;
 import dev.homework.restclientapp.dto.responce.car.CarDataResponse;
 import dev.homework.restclientapp.dto.responce.car.CarResponse;
 import org.slf4j.Logger;
@@ -17,22 +17,22 @@ import java.util.stream.Collectors;
 
 
 @Service
-public class CarService {
-    private static final Logger logger = LoggerFactory.getLogger(CarService.class);
+public class VehicleService {
+    private static final Logger logger = LoggerFactory.getLogger(VehicleService.class);
     public final String BASE_URL = "https://api.cepik.gov.pl";
-    public final String URI_CARS = "/pojazdy?wojewodztwo=%s&data-od=%s&data-do=%s";
+    public final String URI_VEHICLES = "/pojazdy?wojewodztwo=%s&data-od=%s&data-do=%s";
     private final RestClient restClient;
 
-    public CarService() {
+    public VehicleService() {
         restClient = RestClient.builder()
                 .baseUrl(BASE_URL)
                 .build();
     }
 
-    public List<CarDataResponse> getCarsData(CarSearchRequestDto carRequestDto) {
-        logger.info("Fetching vehicles from API: {}", BASE_URL + URI_CARS);
-        String uri = String.format(URI_CARS,
-                carRequestDto.getWojewodztwo(), carRequestDto.getDataOd(), carRequestDto.getDataDo());
+    public List<CarDataResponse> getVehiclesData(SearchVehiclesRequest carRequestDto) {
+        logger.info("Fetching vehicles from API: {}", BASE_URL + URI_VEHICLES);
+        String uri = String.format(URI_VEHICLES,
+                carRequestDto.getProvinceName(), carRequestDto.getDateFrom(), carRequestDto.getDateTo());
 
         return Objects.requireNonNull(restClient.get()
                 .uri(uri)
@@ -42,16 +42,16 @@ public class CarService {
 
     }
 
-    public List<Car> getCarByModel(CarSearchRequestDto carRequestDto) {
+    public List<Vehicle> getCarByModel(SearchVehiclesRequest carRequestDto) {
 
-        List<CarDataResponse> carsData = getCarsData(carRequestDto);
+        List<CarDataResponse> VehiclesData = getVehiclesData(carRequestDto);
 
-        return carsData
+        return VehiclesData
                 .stream()
                 .map(car -> {
 
                     Map<String, Object> attributes = car.getAttributes();
-                    return new Car(
+                    return new Vehicle(
                             car.getId(),
                             (String) attributes.get("marka"),
                             (String) attributes.get("model"),

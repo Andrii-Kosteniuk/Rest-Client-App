@@ -1,4 +1,4 @@
-package dev.homework.restclientapp.dto.responce.district;
+package dev.homework.restclientapp.dto.response.province;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;

@@ -1,4 +1,4 @@
-package dev.homework.restclientapp.dto.responce.district;
+package dev.homework.restclientapp.dto.response.province;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -12,7 +12,7 @@ import java.util.Map;
 public class Attributes {
 
     @JsonProperty("dostepne-rekordy-slownika")
-    private List<DistrictRecord> districtRecords;
+    private List<ProvinceRecord> provinceRecords;
 
     @JsonProperty("attributes")
     private Map<String, Object> attributes;

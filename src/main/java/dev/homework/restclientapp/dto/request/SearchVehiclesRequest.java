@@ -4,12 +4,12 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
 @Data
-public class CarSearchRequestDto {
+public class SearchVehiclesRequest {
     @NotBlank
-    private String wojewodztwo;
+    private String provinceName;
     @NotBlank
-    private String dataOd;
+    private String dateFrom;
     @NotBlank
-    private String dataDo;
+    private String dateTo;
 }
 

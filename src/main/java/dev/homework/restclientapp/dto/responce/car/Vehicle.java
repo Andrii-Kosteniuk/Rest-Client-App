@@ -6,28 +6,28 @@ import lombok.Getter;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @Getter
-public class Car {
+public class Vehicle {
 
     @JsonProperty("id")
     private String id;
 
     @JsonProperty("marka")
-    private String marka;
+    private String mark;
 
     @JsonProperty("model")
     private String model;
 
     @JsonProperty("data-pierwszej-rejestracjiwkraju")
-    private String dataPierwszejRejestracji;
+    private String dateOfFirstRegistration;
 
     @JsonProperty("rok-produkcji")
-    private String rokProdukcji;
+    private String yearOfProduction;
 
-    public Car(String id, String marka, String model, String dataPierwszejRejestracji, String rokProdukcji) {
+    public Vehicle(String id, String mark, String model, String dateOfFirstRegistration, String yearOfProduction) {
         this.id = id;
-        this.marka = marka;
+        this.mark = mark;
         this.model = model;
-        this.dataPierwszejRejestracji = dataPierwszejRejestracji;
-        this.rokProdukcji = rokProdukcji;
+        this.dateOfFirstRegistration = dateOfFirstRegistration;
+        this.yearOfProduction = yearOfProduction;
     }
 }
