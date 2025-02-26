@@ -4,6 +4,8 @@
 *.js linguist-vendored
 *.ts linguist-vendored
 *.json linguist-vendored
+vite.config.ts linguist-vendored
+vite.generated.ts linguist-vendored
 node_modules/* linguist-vendored
 
 *.java linguist-detectable
