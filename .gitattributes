@@ -1,11 +1,17 @@
-/mvnw text eol=lf
-*.cmd text eol=crlf
-
-*.js linguist-vendored
+# Ignore TypeScript, JavaScript, and Vaadin frontend files from language stats
 *.ts linguist-vendored
+*.tsx linguist-vendored
+*.js linguist-vendored
 *.json linguist-vendored
-vite.config.ts linguist-vendored
-vite.generated.ts linguist-vendored
-node_modules/* linguist-vendored
 
+# Ignore specific Vaadin frontend files
+frontend/* linguist-vendored
+jar-resources/* linguist-vendored
+node_modules/* linguist-vendored
+vite-devmode.ts linguist-vendored
+vaadin.ts linguist-vendored
+vaadin-react.tsx linguist-vendored
+vaadin-featureflags.js linguist-vendored
+
+# Ensure Java is counted correctly
 *.java linguist-detectable
