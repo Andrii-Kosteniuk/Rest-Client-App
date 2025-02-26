@@ -1,6 +1,9 @@
 /mvnw text eol=lf
 *.cmd text eol=crlf
-*static/** linguist-vendored
-*public/** linguist-vendored
-*node_modules/** linguist-vendored
-*frontend/**
+
+*.js linguist-vendored
+*.ts linguist-vendored
+*.json linguist-vendored
+node_modules/* linguist-vendored
+
+*.java linguist-detectable
