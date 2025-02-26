@@ -1,2 +1,6 @@
 /mvnw text eol=lf
 *.cmd text eol=crlf
+*static/** linguist-vendored
+*public/** linguist-vendored
+*node_modules/** linguist-vendored
+*frontend/**
