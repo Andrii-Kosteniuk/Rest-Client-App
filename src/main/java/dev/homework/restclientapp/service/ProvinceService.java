@@ -1,9 +1,12 @@
 package dev.homework.restclientapp.service;
 
-import dev.homework.restclientapp.dto.response.province.CepikResponse;
+import dev.homework.restclientapp.dto.response.province.ProvinceAttribute;
+import dev.homework.restclientapp.dto.response.cepik.CepikData;
+import dev.homework.restclientapp.dto.response.cepik.CepikResponse;
 import dev.homework.restclientapp.dto.response.province.ProvinceRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -18,7 +21,7 @@ public class ProvinceService {
     private static final Logger logger = LoggerFactory.getLogger(ProvinceService.class);
 
     public final String BASE_URL = "https://api.cepik.gov.pl";
-    public final String URI_ProvinceS = "/slowniki/wojewodztwa";
+    public final String URI_PROVINCES = "/slowniki/wojewodztwa";
 
     private final RestClient restClient;
 
@@ -29,16 +32,16 @@ public class ProvinceService {
     }
 
     public List<String> getAllProvinceNames() {
-        logger.info("Fetching province names from API: {}", BASE_URL + URI_ProvinceS);
+        logger.info("Fetching province names from API: {}", BASE_URL + URI_PROVINCES);
 
         try {
-            ResponseEntity<CepikResponse> response = restClient.get()
-                    .uri(URI_ProvinceS)
+            ResponseEntity<CepikResponse<CepikData<ProvinceAttribute>>> response = restClient.get()
+                    .uri(URI_PROVINCES)
                     .retrieve()
-                    .toEntity(CepikResponse.class);
+                    .toEntity(new ParameterizedTypeReference<>() {
+                    });
 
             if (! Objects.isNull(response.getBody()) && ! Objects.isNull(response.getBody().getData())) {
-                logger.info("Successfully retrieved data from API");
                 return response.getBody().getData()
                         .getAttributes()
                         .getProvinceRecords()
