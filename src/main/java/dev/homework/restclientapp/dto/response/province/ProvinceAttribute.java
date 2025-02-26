@@ -1,15 +1,15 @@
 package dev.homework.restclientapp.dto.response.province;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Getter;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 
 import java.util.List;
 import java.util.Map;
 
-@JsonIgnoreProperties(ignoreUnknown = true)
-@Getter
-public class Attributes {
+@Data
+@AllArgsConstructor
+public class ProvinceAttribute {
 
     @JsonProperty("dostepne-rekordy-slownika")
     private List<ProvinceRecord> provinceRecords;

@@ -2,77 +2,49 @@ package dev.homework.restclientapp.vaadin.layout;
 
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
-import com.vaadin.flow.component.button.Button;
-import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Header;
 import com.vaadin.flow.component.html.Span;
-import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
-import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import dev.homework.restclientapp.service.ProvinceService;
-import dev.homework.restclientapp.service.VehicleService;
-import dev.homework.restclientapp.vaadin.view.VehicleInfoView;
+import dev.homework.restclientapp.vaadin.view.HomeView;
+import dev.homework.restclientapp.vaadin.view.SearchCarView;
 
 import java.util.ArrayList;
 import java.util.List;
 
 
-@Route("")
 public class MainApplicationLayout extends AppLayout {
-    private final VehicleService vehicleService;
-    private final ProvinceService provinceService;
 
-    public MainApplicationLayout(VehicleService vehicleService, ProvinceService provinceService) {
-        this.vehicleService = vehicleService;
-        this.provinceService = provinceService;
-
+    public MainApplicationLayout() {
 
         setPrimarySection(Section.DRAWER);
-        VehicleInfoView vehicleInfoView = new VehicleInfoView(vehicleService, provinceService);
         addNavbarContent();
         addDrawerContent();
-
-        VerticalLayout contentLayout = new VerticalLayout();
-        contentLayout.add(vehicleInfoView);
-
-        setContent(contentLayout);
 
     }
 
     private Tabs getTabs() {
         Tabs tabs = new Tabs();
 
-        Tab homeTab = new Tab("Home");
-        Tab findVehicleTab = new Tab("Find Vehicles");
-
-        tabs.addSelectedChangeListener(event ->
-        {
-            Tab selectedTab = event.getSelectedTab();
-            if (selectedTab.equals(homeTab)) {
-                switchToHome();
-            } else if (selectedTab.equals(findVehicleTab)) {
-                switchToSearchVehicles();
-            }
-        });
-
-        Button vehicleFindButton = new Button("Find vehicles", event -> switchToSearchVehicles());
-        vehicleFindButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY);
-
-        tabs.add(findVehicleTab);
         List<Tab> tabsList = defineTabs();
         tabsList.forEach(tabs::add);
 
         tabs.setOrientation(Tabs.Orientation.VERTICAL);
-        tabs.setHeight("240px");
-        tabs.setWidth("240px");
         return tabs;
     }
 
     private List<Tab> defineTabs() {
         List<Tab> tabs = new ArrayList<>();
+
+        Tab homeTab = new Tab(new RouterLink("Home", HomeView.class));
+        Tab vehicleTab = new Tab(new RouterLink("Find Vehicles", SearchCarView.class));
+
+
+        tabs.add(homeTab);
+        tabs.add(vehicleTab);
         tabs.add(new Tab("About"));
         tabs.add(new Tab("Contact"));
 
@@ -98,7 +70,7 @@ public class MainApplicationLayout extends AppLayout {
     private void addDrawerContent() {
         Tabs tabs = getTabs();
 
-        var appName = new Span("Vehicle pocket");
+        var appName = new Span("What do you want to do?");
         appName.addClassNames(LumoUtility.AlignItems.CENTER, LumoUtility.Display.FLEX,
                 LumoUtility.FontSize.LARGE, LumoUtility.FontWeight.SEMIBOLD,
                 LumoUtility.Height.XLARGE, LumoUtility.Padding.Horizontal.MEDIUM);
@@ -106,14 +78,5 @@ public class MainApplicationLayout extends AppLayout {
         addToDrawer(appName, tabs);
 
     }
-
-    private void switchToSearchVehicles() {
-        setContent(new FormLayoutSearchCar(vehicleService, provinceService));
-    }
-
-    private void switchToHome() {
-        setContent(new VehicleInfoView(vehicleService, provinceService));
-    }
-
 
 }
