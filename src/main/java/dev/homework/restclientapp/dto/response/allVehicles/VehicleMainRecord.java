@@ -12,15 +12,15 @@ public class VehicleMainRecord {
     private String id;
 
     @JsonProperty("marka")
-    private String mark;
+    private String marka;
 
     @JsonProperty("model")
     private String model;
 
     @JsonProperty("data-pierwszej-rejestracjiwkraju")
-    private String dateOfFirstRegistration;
+    private String dataPierwszejRejestracji;
 
     @JsonProperty("rok-produkcji")
-    private String yearOfProduction;
+    private String rokProdukcji;
 
 }
