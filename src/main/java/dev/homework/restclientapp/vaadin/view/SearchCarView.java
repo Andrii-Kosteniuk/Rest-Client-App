@@ -16,8 +16,6 @@ import dev.homework.restclientapp.dto.response.singleVehicle.VehicleByIdRecords;
 import dev.homework.restclientapp.service.ProvinceService;
 import dev.homework.restclientapp.service.VehicleService;
 import dev.homework.restclientapp.vaadin.layout.MainApplicationLayout;
-import org.springframework.retry.annotation.Retryable;
-import org.springframework.web.client.ResourceAccessException;
 
 import java.lang.reflect.Field;
 import java.util.List;
@@ -28,8 +26,8 @@ public class SearchCarView extends Div {
     private final ProvinceService cepikService;
     private final Grid<VehicleMainRecord> carGrid = new Grid<>(VehicleMainRecord.class);
     private final Select<String> selectProvince = new Select<>();
-    private final DatePicker dateFrom = new DatePicker("CepikData od");
-    private final DatePicker dateTo = new DatePicker("CepikData do");
+    private final DatePicker dateFrom = new DatePicker("Data od");
+    private final DatePicker dateTo = new DatePicker("Data do");
 
     VehicleRequest vehicleRequest = new VehicleRequest();
 
@@ -37,7 +35,7 @@ public class SearchCarView extends Div {
         this.vehicleService = vehicleService;
         this.cepikService = provinceService;
 
-        Button submitButton = new Button("Search", e -> searchVehicles());
+        Button submitButton = new Button("Szukaj...", e -> searchVehicles());
         FormLayout formLayout = new FormLayout();
 
 
@@ -56,13 +54,20 @@ public class SearchCarView extends Div {
 
     private void defineProvinces(ProvinceService provinceService) {
         List<String> allProvinceNames = provinceService.getAllProvinceNames();
+
+        if (allProvinceNames == null) {
+            allProvinceNames = List.of("Brak danych");
+        }
+
         selectProvince.setItems(allProvinceNames);
         selectProvince.setPlaceholder("Wybierz województwo...");
         selectProvince.setLabel("Województwo");
+
+
     }
 
     private void showTableVehicleInformation() {
-        carGrid.setColumns("mark", "model", "dateOfFirstRegistration", "yearOfProduction");
+        carGrid.setColumns("marka", "model", "dataPierwszejRejestracji", "rokProdukcji");
         carGrid.addItemClickListener(event -> {
             VehicleMainRecord selectedCar = event.getItem();
             if (selectedCar != null) {
