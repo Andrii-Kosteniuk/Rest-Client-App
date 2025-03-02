@@ -16,6 +16,8 @@ import dev.homework.restclientapp.dto.response.singleVehicle.VehicleByIdRecords;
 import dev.homework.restclientapp.service.ProvinceService;
 import dev.homework.restclientapp.service.VehicleService;
 import dev.homework.restclientapp.vaadin.layout.MainApplicationLayout;
+import org.springframework.retry.annotation.Retryable;
+import org.springframework.web.client.ResourceAccessException;
 
 import java.lang.reflect.Field;
 import java.util.List;

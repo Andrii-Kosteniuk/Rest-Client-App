@@ -2,17 +2,19 @@ package dev.homework.restclientapp.service;
 
 import dev.homework.restclientapp.dto.request.VehicleRequest;
 import dev.homework.restclientapp.dto.response.CarDetailsMapper;
-import dev.homework.restclientapp.dto.response.cepik.CepikData;
-import dev.homework.restclientapp.dto.response.cepik.CepikResponse;
 import dev.homework.restclientapp.dto.response.allVehicles.VehicleDataResponse;
 import dev.homework.restclientapp.dto.response.allVehicles.VehicleMainRecord;
 import dev.homework.restclientapp.dto.response.allVehicles.VehicleResponse;
+import dev.homework.restclientapp.dto.response.cepik.CepikData;
+import dev.homework.restclientapp.dto.response.cepik.CepikResponse;
 import dev.homework.restclientapp.dto.response.singleVehicle.VehicleByIdRecords;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.ResponseEntity;
+import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 
 import java.util.List;
@@ -34,18 +36,18 @@ public class VehicleService {
                 .build();
     }
 
+    @Retryable(retryFor = ResourceAccessException.class, maxAttempts = 2)
     public List<VehicleDataResponse> getVehiclesData(VehicleRequest carRequestDto) {
         logger.info("Fetching vehicles from API: {}", BASE_URL + URI_VEHICLES);
         String uri = String.format(URI_VEHICLES,
                 carRequestDto.getProvinceName(), carRequestDto.getDateFrom(), carRequestDto.getDateTo());
+                    return Objects.requireNonNull(restClient.get()
+                    .uri(uri)
+                    .retrieve()
+                    .toEntity(new ParameterizedTypeReference<VehicleResponse>() {
+                    }).getBody()).getData();
 
-        return Objects.requireNonNull(restClient.get()
-                .uri(uri)
-                .retrieve()
-                .toEntity(new ParameterizedTypeReference<VehicleResponse>() {
-                }).getBody()).getData();
-
-    }
+        }
 
     public List<VehicleMainRecord> getVehicleMainInfo(VehicleRequest vehicleRequest) {
 
@@ -55,7 +57,7 @@ public class VehicleService {
         return carDetailsMapper.mapToVehicleMainInfo(vehicleDataResponses);
     }
 
-
+    @Retryable(retryFor = ResourceAccessException.class, maxAttempts = 2)
     public VehicleByIdRecords getCarDetails(String id) {
         final String URI_VEHICLE_BY_ID = "/pojazdy/%s".formatted(id);
         logger.info("Fetching vehicle by ID: {} from API: {}", id, BASE_URL + URI_VEHICLE_BY_ID);
