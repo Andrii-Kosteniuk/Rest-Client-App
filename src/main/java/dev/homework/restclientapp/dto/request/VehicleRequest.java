@@ -8,8 +8,8 @@ public class VehicleRequest {
     @NotBlank
     private String provinceName;
     @NotBlank
-    private String dateFrom;
+    private String  dateFrom;
     @NotBlank
-    private String dateTo;
+    private String  dateTo;
 }
 

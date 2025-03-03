@@ -2,12 +2,10 @@ package dev.homework.restclientapp.service;
 
 import dev.homework.restclientapp.dto.request.VehicleRequest;
 import dev.homework.restclientapp.dto.response.CarDetailsMapper;
-import dev.homework.restclientapp.dto.response.allVehicles.VehicleDataResponse;
-import dev.homework.restclientapp.dto.response.allVehicles.VehicleMainRecord;
-import dev.homework.restclientapp.dto.response.allVehicles.VehicleResponse;
-import dev.homework.restclientapp.dto.response.cepik.CepikData;
-import dev.homework.restclientapp.dto.response.cepik.CepikResponse;
+import dev.homework.restclientapp.dto.response.general.VehicleDataResponse;
+import dev.homework.restclientapp.dto.response.general.VehicleMainRecord;
 import dev.homework.restclientapp.dto.response.singleVehicle.VehicleByIdRecords;
+import dev.homework.restclientapp.dto.response.singleVehicle.VehicleByIdResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
@@ -39,22 +37,24 @@ public class VehicleService {
     @Retryable(retryFor = ResourceAccessException.class, maxAttempts = 2)
     public List<VehicleDataResponse> getVehiclesData(VehicleRequest carRequestDto) {
         logger.info("Fetching vehicles from API: {}", BASE_URL + URI_VEHICLES);
+
         String uri = String.format(URI_VEHICLES,
                 carRequestDto.getProvinceName(), carRequestDto.getDateFrom(), carRequestDto.getDateTo());
-                    return Objects.requireNonNull(restClient.get()
-                    .uri(uri)
-                    .retrieve()
-                    .toEntity(new ParameterizedTypeReference<VehicleResponse>() {
-                    }).getBody()).getData();
 
-        }
+        return Objects.requireNonNull(restClient.get()
+                .uri(uri)
+                .retrieve()
+                .toEntity(new ParameterizedTypeReference<dev.homework.restclientapp.dto.response.general.VehicleResponse>() {
+                }).getBody()).getData();
+
+    }
 
     public List<VehicleMainRecord> getVehicleMainInfo(VehicleRequest vehicleRequest) {
 
-        List<VehicleDataResponse> vehicleDataResponses = getVehiclesData(vehicleRequest);
+        List<VehicleDataResponse> vehiclesData = getVehiclesData(vehicleRequest);
         logger.info("Fetching vehicles from API and setting them to VehicleMainRecord object");
 
-        return carDetailsMapper.mapToVehicleMainInfo(vehicleDataResponses);
+        return carDetailsMapper.mapToVehicleMainInfo(vehiclesData);
     }
 
     @Retryable(retryFor = ResourceAccessException.class, maxAttempts = 2)
@@ -62,15 +62,14 @@ public class VehicleService {
         final String URI_VEHICLE_BY_ID = "/pojazdy/%s".formatted(id);
         logger.info("Fetching vehicle by ID: {} from API: {}", id, BASE_URL + URI_VEHICLE_BY_ID);
 
-        ResponseEntity<CepikResponse<CepikData<VehicleByIdRecords>>> response = restClient.get()
+        ResponseEntity<VehicleByIdResponse> response = restClient.get()
                 .uri(URI_VEHICLE_BY_ID)
                 .retrieve()
-                .toEntity(new ParameterizedTypeReference<>() {
-                });
+                .toEntity(VehicleByIdResponse.class);
 
         logger.info("Successfully retrieved data from API: {}", BASE_URL + URI_VEHICLE_BY_ID);
 
-        return carDetailsMapper.mapToVehicleDetails(Objects.requireNonNull(response.getBody()).getData());
+        return carDetailsMapper.mapToVehicleDetails(Objects.requireNonNull(response.getBody()));
 
     }
 }

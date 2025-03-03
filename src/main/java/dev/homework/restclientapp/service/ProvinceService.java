@@ -3,13 +3,10 @@ package dev.homework.restclientapp.service;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
-import dev.homework.restclientapp.dto.response.cepik.CepikData;
-import dev.homework.restclientapp.dto.response.cepik.CepikResponse;
-import dev.homework.restclientapp.dto.response.province.ProvinceAttribute;
+import dev.homework.restclientapp.dto.response.province.CepikResponse;
 import dev.homework.restclientapp.dto.response.province.ProvinceRecord;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.ResourceAccessException;
@@ -34,7 +31,7 @@ public class ProvinceService {
                 .build();
     }
 
-    private static void showNotificationTimeOut() {
+    private static void showNotificationErrorIfTimeOutExceptionOccur() {
         Notification notification = new Notification("Timeout exception occurred! Try to reload page, please:)", 5000);
         notification.addThemeVariants(NotificationVariant.LUMO_ERROR);
         notification.addClassNames();
@@ -45,11 +42,10 @@ public class ProvinceService {
         logger.info("Fetching province names from API: {}", BASE_URL + URI_PROVINCES);
 
         try {
-            ResponseEntity<CepikResponse<CepikData<ProvinceAttribute>>> response = restClient.get()
+            ResponseEntity<CepikResponse> response = restClient.get()
                     .uri(URI_PROVINCES)
                     .retrieve()
-                    .toEntity(new ParameterizedTypeReference<>() {
-                    });
+                    .toEntity(CepikResponse.class);
 
             if (! Objects.isNull(response.getBody()) && ! Objects.isNull(response.getBody().getData())) {
                 return response.getBody().getData()
@@ -65,7 +61,7 @@ public class ProvinceService {
         } catch (ResourceAccessException e) {
             logger.error("Error while fetching data from API", e);
 
-            UI.getCurrent().access(ProvinceService::showNotificationTimeOut);
+            UI.getCurrent().access(ProvinceService::showNotificationErrorIfTimeOutExceptionOccur);
         }
         return Collections.emptyList();
     }
