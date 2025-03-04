@@ -4,6 +4,7 @@ import dev.homework.restclientapp.dto.request.VehicleRequest;
 import dev.homework.restclientapp.dto.response.CarDetailsMapper;
 import dev.homework.restclientapp.dto.response.general.VehicleDataResponse;
 import dev.homework.restclientapp.dto.response.general.VehicleMainRecord;
+import dev.homework.restclientapp.dto.response.general.VehicleResponse;
 import dev.homework.restclientapp.dto.response.singleVehicle.VehicleByIdRecords;
 import dev.homework.restclientapp.dto.response.singleVehicle.VehicleByIdResponse;
 import org.slf4j.Logger;
@@ -44,7 +45,7 @@ public class VehicleService {
         return Objects.requireNonNull(restClient.get()
                 .uri(uri)
                 .retrieve()
-                .toEntity(new ParameterizedTypeReference<dev.homework.restclientapp.dto.response.general.VehicleResponse>() {
+                .toEntity(new ParameterizedTypeReference<VehicleResponse>() {
                 }).getBody()).getData();
 
     }
