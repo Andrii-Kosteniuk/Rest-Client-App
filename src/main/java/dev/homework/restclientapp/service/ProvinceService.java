@@ -66,8 +66,8 @@ public class ProvinceService {
         return Collections.emptyList();
     }
 
-    public String getProvinceKey(String ProvinceName) {
-        return switch (ProvinceName) {
+    public String getProvinceKey(String provinceName) {
+        return switch (provinceName) {
             case "DOLNOŚLĄSKIE" -> "02";
             case "KUJAWSKO-POMORSKIE" -> "04";
             case "LUBELSKIE" -> "06";
