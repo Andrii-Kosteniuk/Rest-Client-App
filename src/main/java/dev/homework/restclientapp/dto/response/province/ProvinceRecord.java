@@ -2,9 +2,11 @@ package dev.homework.restclientapp.dto.response.province;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
+@AllArgsConstructor
 @Getter
 public class ProvinceRecord {
 
@@ -13,4 +15,5 @@ public class ProvinceRecord {
 
     @JsonProperty("wartosc-slownika")
     private String provinceName;
+
 }
