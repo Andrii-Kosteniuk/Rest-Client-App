@@ -1,9 +1,11 @@
-package dev.homework.restclientapp.dto.response;
+package dev.homework.restclientapp.dto;
 
 
 import dev.homework.restclientapp.dto.response.general.VehicleDataResponse;
 import dev.homework.restclientapp.dto.response.general.VehicleMainRecord;
-import dev.homework.restclientapp.dto.response.singleVehicle.VehicleByIdRecords;
+import dev.homework.restclientapp.dto.response.province.CepikResponse;
+import dev.homework.restclientapp.dto.response.province.ProvinceRecord;
+import dev.homework.restclientapp.dto.response.singleVehicle.VehicleByIdRecord;
 import dev.homework.restclientapp.dto.response.singleVehicle.VehicleByIdResponse;
 import org.springframework.stereotype.Component;
 
@@ -12,13 +14,13 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
-public class CarDetailsMapper {
+public class DataMapper {
 
-    public VehicleByIdRecords mapToVehicleDetails(VehicleByIdResponse vehicleByIdResponse) {
+    public VehicleByIdRecord mapToVehicleDetails(VehicleByIdResponse vehicleByIdResponse) {
 
         Map<String, Object> attributes = vehicleByIdResponse.getData().getAttributes();
 
-        return new VehicleByIdRecords(
+        return new VehicleByIdRecord(
                 (String) attributes.get("marka"),
                 (String) attributes.get("model"),
                 (String) attributes.get("rodzaj-pojazdu"),
@@ -48,7 +50,7 @@ public class CarDetailsMapper {
                             car.getId(),
                             (String) attributes.get("marka"),
                             (String) attributes.get("model"),
-                            (String) attributes.get("data-pierwszej-rejestracji"),
+                            (String) attributes.get("data-pierwszej-rejestracji-w-kraju"),
                             (String) attributes.get("rok-produkcji")
 
                     );
@@ -68,6 +70,15 @@ public class CarDetailsMapper {
             return ((Number) value).doubleValue();
         }
         return 0.0;
+    }
+
+    public List<String> mapToProvinceName(CepikResponse response) {
+
+        List<ProvinceRecord> provinceRecords = response.getData().getAttributes().getProvinceRecords();
+        return provinceRecords
+                .stream()
+                .map(ProvinceRecord::getProvinceName)
+                .collect(Collectors.toList());
     }
 
 }
