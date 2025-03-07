@@ -3,10 +3,12 @@ package dev.homework.restclientapp.dto.response.singleVehicle;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
 @AllArgsConstructor
-public class VehicleByIdRecords {
+@NoArgsConstructor
+public class VehicleByIdRecord {
 
     @JsonProperty("marka")
     private String mark;
