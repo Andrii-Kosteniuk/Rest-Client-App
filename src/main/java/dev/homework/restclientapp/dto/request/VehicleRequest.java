@@ -1,15 +1,22 @@
 package dev.homework.restclientapp.dto.request;
 
-import jakarta.validation.constraints.NotBlank;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.stereotype.Component;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Component
 public class VehicleRequest {
-    @NotBlank
+
     private String provinceName;
-    @NotBlank
+
     private String  dateFrom;
-    @NotBlank
+
     private String  dateTo;
+
+    private boolean registered;
 }
 
