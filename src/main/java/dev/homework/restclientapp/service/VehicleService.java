@@ -1,76 +1,140 @@
 package dev.homework.restclientapp.service;
 
+import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.html.Span;
+import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.dom.Style;
+import com.vaadin.flow.theme.lumo.LumoUtility;
 import dev.homework.restclientapp.dto.request.VehicleRequest;
-import dev.homework.restclientapp.dto.response.CarDetailsMapper;
-import dev.homework.restclientapp.dto.response.general.VehicleDataResponse;
 import dev.homework.restclientapp.dto.response.general.VehicleMainRecord;
-import dev.homework.restclientapp.dto.response.general.VehicleResponse;
-import dev.homework.restclientapp.dto.response.singleVehicle.VehicleByIdRecords;
-import dev.homework.restclientapp.dto.response.singleVehicle.VehicleByIdResponse;
+import dev.homework.restclientapp.dto.response.singleVehicle.VehicleByIdRecord;
+import dev.homework.restclientapp.service.api.ProvinceApiService;
+import dev.homework.restclientapp.service.api.VehicleApiService;
+import dev.homework.restclientapp.util.DataValidation;
+import dev.homework.restclientapp.vaadin.notification.FormValidationNotification;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.ResponseEntity;
-import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.ResourceAccessException;
-import org.springframework.web.client.RestClient;
 
+import java.lang.reflect.Field;
+import java.time.LocalDate;
 import java.util.List;
-import java.util.Objects;
+
+import static dev.homework.restclientapp.vaadin.view.SearchCarView.*;
 
 @Service
+@RequiredArgsConstructor
 public class VehicleService {
+
     private static final Logger logger = LoggerFactory.getLogger(VehicleService.class);
-    public final String BASE_URL = "https://api.cepik.gov.pl";
-    public final String URI_VEHICLES = "/pojazdy?wojewodztwo=%s&data-od=%s&data-do=%s";
-    private final RestClient restClient;
-    private final CarDetailsMapper carDetailsMapper;
+    private final VehicleRequest vehicleRequest;
+    private final VehicleApiService vehicleAPIService;
+    private final DataValidation dataValidation;
+    private final ProvinceService provinceService;
+    private final FormValidationNotification formValidationNotification;
 
-    public VehicleService(CarDetailsMapper carDetailsMapper) {
-        this.carDetailsMapper = carDetailsMapper;
+    private boolean isFetchingDetails = false;
 
-        restClient = RestClient.builder()
-                .baseUrl(BASE_URL)
-                .build();
+    private static void printFieldsAndInformation(VehicleByIdRecord carDetails, VerticalLayout infoLayout) {
+        Field[] fields = carDetails.getClass().getDeclaredFields();
+        for (Field field : fields) {
+            field.setAccessible(true);
+            try {
+                Object value = field.get(carDetails);
+                if (value != null) {
+                    infoLayout.add(new Span(field.getName() + ": " + value));
+                }
+            } catch (IllegalAccessException e) {
+                e.getCause();
+            }
+        }
     }
 
-    @Retryable(retryFor = ResourceAccessException.class, maxAttempts = 2)
-    public List<VehicleDataResponse> getVehiclesData(VehicleRequest carRequestDto) {
-        logger.info("Fetching vehicles from API: {}", BASE_URL + URI_VEHICLES);
+    private void fetchDataFromApi() {
+        Boolean registeredCheckBoxValue = registeredCheckBox.getValue();
+        vehicleRequest.setRegistered(registeredCheckBoxValue);
+        logger.debug("Fetching registered vehicles {}", registeredCheckBoxValue);
 
-        String uri = String.format(URI_VEHICLES,
-                carRequestDto.getProvinceName(), carRequestDto.getDateFrom(), carRequestDto.getDateTo());
-
-        return Objects.requireNonNull(restClient.get()
-                .uri(uri)
-                .retrieve()
-                .toEntity(new ParameterizedTypeReference<VehicleResponse>() {
-                }).getBody()).getData();
-
+        List<VehicleMainRecord> vehicleMainRecords = vehicleAPIService.getVehicleMainInfo(vehicleRequest);
+        mainRecordGrid.setItems(vehicleMainRecords);
+        logger.info("Fetching data from API and setting items to main records");
     }
 
-    public List<VehicleMainRecord> getVehicleMainInfo(VehicleRequest vehicleRequest) {
-
-        List<VehicleDataResponse> vehiclesData = getVehiclesData(vehicleRequest);
-        logger.info("Fetching vehicles from API and setting them to VehicleMainRecord object");
-
-        return carDetailsMapper.mapToVehicleMainInfo(vehiclesData);
+    public void submitForm() {
+        if (dataValidation.binder.isValid()) {
+            fillFormFieldsForSearchVehicles();
+            fetchDataFromApi();
+            logger.info("Form  submitted");
+        } else {
+            formValidationNotification.showInvalidDateNotification();
+            logger.error("Form Validation Error");
+        }
     }
 
-    @Retryable(retryFor = ResourceAccessException.class, maxAttempts = 2)
-    public VehicleByIdRecords getCarDetails(String id) {
-        final String URI_VEHICLE_BY_ID = "/pojazdy/%s".formatted(id);
-        logger.info("Fetching vehicle by ID: {} from API: {}", id, BASE_URL + URI_VEHICLE_BY_ID);
+    private void fillFormFieldsForSearchVehicles() {
+        vehicleRequest.setProvinceName(provinceService.getProvinceKey(selectProvince.getValue()));
 
-        ResponseEntity<VehicleByIdResponse> response = restClient.get()
-                .uri(URI_VEHICLE_BY_ID)
-                .retrieve()
-                .toEntity(VehicleByIdResponse.class);
+        LocalDate dateFrom = datePickerFrom.getValue();
+        LocalDate dateTo = datePickerTo.getValue();
 
-        logger.info("Successfully retrieved data from API: {}", BASE_URL + URI_VEHICLE_BY_ID);
+        vehicleRequest.setDateFrom(DATE_FORMATTER.format(dateFrom));
+        vehicleRequest.setDateTo(DATE_FORMATTER.format(dateTo));
+    }
 
-        return carDetailsMapper.mapToVehicleDetails(Objects.requireNonNull(response.getBody()));
+    public void showTableVehicleInformation() {
+        mainRecordGrid.setColumns("marka", "model", "dataPierwszejRejestracji", "rokProdukcji");
+        logger.info("Showing table vehicle information");
 
+        mainRecordGrid.addItemClickListener(event -> {
+            VehicleMainRecord selectedCar = event.getItem();
+            if (selectedCar != null) {
+                showCarDetails(selectedCar.getId());
+                logger.info("Selected car {}:", selectedCar);
+            }
+        });
+    }
+
+    public void defineProvinces(ProvinceApiService provinceApiService) {
+        logger.info("Trying to get provinces");
+        List<String> allProvinceNames = provinceApiService.getAllProvinceNames();
+            selectProvince.setItems(allProvinceNames);
+            logger.info("Provinces were retrieved successfully");
+    }
+
+    private void showCarDetails(String vehicleId) {
+        if (isFetchingDetails) {
+            return;
+        }
+        isFetchingDetails = true;
+
+        VehicleByIdRecord vehicleDetails = vehicleAPIService.getCarDetails(vehicleId);
+
+        Dialog detailsDialog = new Dialog();
+        detailsDialog.setHeaderTitle("Vehicle details");
+        detailsDialog.setWidth("600px");
+
+        Div detailsContainer = new Div();
+        detailsContainer.getStyle()
+                .setDisplay(Style.Display.GRID)
+                .setDisplay(Style.Display.TABLE_COLUMN).set("gap", "10px")
+                .setPadding("10px");
+
+        VerticalLayout infoLayout = new VerticalLayout();
+        infoLayout.getStyle().setBoxShadow(LumoUtility.BoxShadow.MEDIUM);
+        printFieldsAndInformation(vehicleDetails, infoLayout);
+
+        detailsDialog.add(infoLayout);
+
+        Button closeButton = new Button("Close", e -> {
+            detailsDialog.close();
+            isFetchingDetails = false;
+        });
+
+        detailsDialog.getFooter().add(closeButton);
+
+        detailsDialog.open();
     }
 }
