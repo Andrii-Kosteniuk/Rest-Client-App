@@ -12,11 +12,10 @@ import org.springframework.stereotype.Component;
 public class VehicleRequest {
 
     private String provinceName;
-
-    private String  dateFrom;
-
-    private String  dateTo;
-
+    private String dateFrom;
+    private String dateTo;
     private boolean registered;
+    private int page;
+    private int limit;
 }
 
