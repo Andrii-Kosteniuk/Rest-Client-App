@@ -1,18 +1,17 @@
 package dev.homework.restclientapp.vaadin.view;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.router.Route;
-import dev.homework.restclientapp.dto.response.general.VehicleMainRecord;
+import dev.homework.restclientapp.service.ProvinceService;
 import dev.homework.restclientapp.service.VehicleService;
-import dev.homework.restclientapp.service.api.ProvinceApiService;
-import dev.homework.restclientapp.util.DataValidation;
 import dev.homework.restclientapp.vaadin.layout.MainApplicationLayout;
+import dev.homework.restclientapp.validation.DataValidation;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -25,10 +24,10 @@ public class SearchCarView extends Div {
     public static Select<String> selectProvince = new Select<>();
     public static DatePicker datePickerFrom = new DatePicker("Data od");
     public static DatePicker datePickerTo = new DatePicker("Data do", LocalDate.now());
-    public static Grid<VehicleMainRecord> mainRecordGrid = new Grid<>(VehicleMainRecord.class);
     public static Checkbox registeredCheckBox = new Checkbox();
 
-    public SearchCarView(ProvinceApiService provinceApiService, DataValidation dataValidation, VehicleService vehicleService) {
+
+    public SearchCarView(ProvinceService provinceService, DataValidation dataValidation, VehicleService vehicleService) {
         FormLayout formLayout = new FormLayout();
 
         selectProvince.setLabel("Województwo");
@@ -41,19 +40,22 @@ public class SearchCarView extends Div {
         registeredCheckBox.setTooltipText("Mają zostać zwrócone dane tylko pojazdów zarejestrowanych");
         registeredCheckBox.setLabel("Tylko zarejestrowane");
 
-        Button submitButton = new Button("Szukaj...", event -> vehicleService.submitForm());
+        Button submitButton = new Button("Szukaj...", event -> {
+            vehicleService.submitForm();
+            UI.getCurrent().navigate(FilterView.class);
+        });
+
+        setStylesToSearchForm(formLayout, submitButton);
+
+        add(formLayout);
+
+        provinceService.populateProvinceNameToSelect(selectProvince);
 
         dataValidation.validateDates(datePickerFrom, datePickerTo);
         dataValidation.validateProvinceNameIsNotEmpty(selectProvince);
-
-        add(formLayout, mainRecordGrid);
-
-        setStylesToDivVehicleInfo(mainRecordGrid);
-        setStylesToSearchForm(formLayout, submitButton);
-
-        vehicleService.defineProvinces(provinceApiService);
-        vehicleService.showTableVehicleInformation();
     }
+
+
 
     private void setStylesToSearchForm(FormLayout formLayout, Button button) {
         formLayout.getStyle().setMarginLeft("1rem");
@@ -67,10 +69,5 @@ public class SearchCarView extends Div {
         button.getStyle().setBorderBottom("1rem");
     }
 
-    private void setStylesToDivVehicleInfo(Grid<VehicleMainRecord> mainRecordGrid) {
-
-        mainRecordGrid.getStyle().setMargin("0 1rem 0 1rem");
-        mainRecordGrid.setMultiSort(true);
-    }
 
 }
