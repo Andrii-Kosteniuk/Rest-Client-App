@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Component
@@ -48,10 +49,10 @@ public class DataMapper {
                     Map<String, Object> attributes = car.getAttributes();
                     return new VehicleMainRecord(
                             car.getId(),
-                            (String) attributes.get("marka"),
-                            (String) attributes.get("model"),
-                            (String) attributes.get("data-pierwszej-rejestracji-w-kraju"),
-                            (String) attributes.get("rok-produkcji")
+                            Objects.requireNonNullElse((String) attributes.get("marka"), "N/A"),
+                            Objects.requireNonNullElse((String) attributes.get("model"), "N/A"),
+                            Objects.requireNonNullElse((String) attributes.get("data-pierwszej-rejestracji-w-kraju"), "N/A"),
+                            Objects.requireNonNullElse((String) attributes.get("rok-produkcji"), "N/A")
 
                     );
                 })
@@ -72,13 +73,13 @@ public class DataMapper {
         return 0.0;
     }
 
-    public List<String> mapToProvinceName(CepikResponse response) {
+    public Map<String, String> mapToProvinceRecord(CepikResponse response) {
 
         List<ProvinceRecord> provinceRecords = response.getData().getAttributes().getProvinceRecords();
         return provinceRecords
                 .stream()
-                .map(ProvinceRecord::getProvinceName)
-                .collect(Collectors.toList());
+                .collect(Collectors.toMap(
+                        ProvinceRecord::getProvinceName, ProvinceRecord::getProvinceKey));
     }
 
 }
