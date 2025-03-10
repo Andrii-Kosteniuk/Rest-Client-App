@@ -10,9 +10,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class ErrorAndExceptionNotification {
 
-    public void showNotificationErrorIfTimeOutExceptionOccur() {
+    public void showNotificationErrorIfTimeOutExceptionOccur(Exception ex) {
         Div text = new Div(
-                new Paragraph("Timeout exception occurred!"),
+                new Paragraph(ex.getMessage()),
                 new Paragraph("Try to reload page, please!"));
         Notification notification = new Notification(text);
 
