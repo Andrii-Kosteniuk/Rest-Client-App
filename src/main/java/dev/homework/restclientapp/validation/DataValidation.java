@@ -1,4 +1,4 @@
-package dev.homework.restclientapp.util;
+package dev.homework.restclientapp.validation;
 
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.select.Select;
