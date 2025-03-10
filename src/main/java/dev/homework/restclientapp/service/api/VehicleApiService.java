@@ -1,7 +1,7 @@
 package dev.homework.restclientapp.service.api;
 
-import dev.homework.restclientapp.dto.request.VehicleRequest;
 import dev.homework.restclientapp.dto.DataMapper;
+import dev.homework.restclientapp.dto.request.VehicleRequest;
 import dev.homework.restclientapp.dto.response.general.VehicleDataResponse;
 import dev.homework.restclientapp.dto.response.general.VehicleMainRecord;
 import dev.homework.restclientapp.dto.response.general.VehicleResponse;
@@ -20,8 +20,8 @@ import java.util.Objects;
 
 @Service
 public class VehicleApiService {
-    public final static String BASE_URL = "https://api.cepik.gov.pl";
-    public final static String URI_VEHICLES = "/pojazdy?wojewodztwo=%s&data-od=%s&data-do=%s";
+    public final static String BASE_URL = "https://api.cepik.gov.pl/pojazdy";
+    public final static String CEPIK_API_VEHICLES_URL = "?wojewodztwo=%s&data-od=%s&data-do=%s&page=%d&limit=%d&tylko-zarejestrowane=%S";
     private static final Logger logger = LoggerFactory.getLogger(VehicleApiService.class);
     private final RestClient restClient;
     private final DataMapper dataMapper;
@@ -34,40 +34,32 @@ public class VehicleApiService {
                 .build();
     }
 
-    public List<VehicleDataResponse> getVehiclesData(VehicleRequest vehicleRequest) {
+    public List<VehicleMainRecord> getVehiclesData(VehicleRequest vehicleRequest) {
 
-        String NOT_REGISTERED = "&tylko-zarejestrowane=false";
-
-        final String uri = ! vehicleRequest.isRegistered() ?
-                String.format(URI_VEHICLES + "%s",
-                        vehicleRequest.getProvinceName(),
-                        vehicleRequest.getDateFrom(),
-                        vehicleRequest.getDateTo(), NOT_REGISTERED) :
-                String.format(URI_VEHICLES,
-                        vehicleRequest.getProvinceName(),
-                        vehicleRequest.getDateFrom(),
-                        vehicleRequest.getDateTo());
+        final String uri = String.format(BASE_URL + CEPIK_API_VEHICLES_URL,
+                vehicleRequest.getProvinceName(),
+                vehicleRequest.getDateFrom(),
+                vehicleRequest.getDateTo(),
+                vehicleRequest.getPage(),
+                vehicleRequest.getLimit(),
+                vehicleRequest.isRegistered());
 
         logger.info("Fetching vehicles from API: {}{}", BASE_URL, uri);
-        return Objects.requireNonNull(restClient.get()
+
+        List<VehicleDataResponse> data = Objects.requireNonNull(restClient.get()
                 .uri(uri)
                 .retrieve()
                 .toEntity(new ParameterizedTypeReference<VehicleResponse>() {
                 }).getBody()).getData();
 
+        return dataMapper.mapToVehicleMainInfo(data);
+
     }
 
-    public List<VehicleMainRecord> getVehicleMainInfo(VehicleRequest vehicleRequest) {
-
-        List<VehicleDataResponse> vehiclesData = getVehiclesData(vehicleRequest);
-        logger.info("Fetching vehicles from API and setting them to VehicleMainRecord object");
-
-        return dataMapper.mapToVehicleMainInfo(vehiclesData);
-    }
 
     @CacheEvict(value = "vehicleDetails", key = "#id")
     public VehicleByIdRecord getCarDetails(String id) {
-        final String URI_VEHICLE_BY_ID = "/pojazdy/%s".formatted(id);
+        final String URI_VEHICLE_BY_ID = "/%s".formatted(id);
 
         logger.info("Fetching vehicle by ID: {} from API: {}", id, BASE_URL + URI_VEHICLE_BY_ID);
 
