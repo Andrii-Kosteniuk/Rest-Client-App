@@ -17,7 +17,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import static dev.homework.restclientapp.vaadin.view.SearchCarView.*;
+import static dev.homework.restclientapp.vaadin.layout.SearchFormLayout.*;
 
 @Service
 @RequiredArgsConstructor
