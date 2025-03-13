@@ -1,6 +1,7 @@
 package dev.homework.restclientapp.service.api;
 
 import dev.homework.restclientapp.dto.response.province.CepikResponse;
+import io.netty.handler.timeout.ReadTimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.ResponseEntity;
@@ -26,8 +27,8 @@ public class ProvinceApiService {
     }
 
     @Retryable(
-            retryFor = {ConnectException.class},
-            backoff = @Backoff(delay = 2000)
+            retryFor = {ReadTimeoutException.class},
+            backoff = @Backoff(maxDelay = 6000)
     )
     public ResponseEntity<CepikResponse> getCepikProvincesResponse() throws ConnectException {
         logger.info("Fetching API response from remote server...");
