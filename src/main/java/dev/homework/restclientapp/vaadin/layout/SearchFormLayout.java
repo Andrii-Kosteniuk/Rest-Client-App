@@ -1,23 +1,23 @@
-package dev.homework.restclientapp.vaadin.view;
+package dev.homework.restclientapp.vaadin.layout;
 
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.html.Div;
+import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.router.Route;
 import dev.homework.restclientapp.service.ProvinceService;
 import dev.homework.restclientapp.service.VehicleService;
-import dev.homework.restclientapp.vaadin.layout.MainApplicationLayout;
+import dev.homework.restclientapp.vaadin.view.FilterLayout;
 import dev.homework.restclientapp.validation.DataValidation;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 @Route(value = "/vehicles-search", layout = MainApplicationLayout.class)
-public class SearchCarView extends Div {
+public class SearchFormLayout extends HorizontalLayout {
 
 
     public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
@@ -27,8 +27,9 @@ public class SearchCarView extends Div {
     public static Checkbox registeredCheckBox = new Checkbox();
 
 
-    public SearchCarView(ProvinceService provinceService, DataValidation dataValidation, VehicleService vehicleService) {
+    public SearchFormLayout(ProvinceService provinceService, DataValidation dataValidation, VehicleService vehicleService) {
         FormLayout formLayout = new FormLayout();
+        formLayout.setSizeFull();
 
         selectProvince.setLabel("Województwo");
         selectProvince.setPlaceholder("Wybierz województwo...");
@@ -42,17 +43,19 @@ public class SearchCarView extends Div {
 
         Button submitButton = new Button("Szukaj...", event -> {
             vehicleService.submitForm();
-            UI.getCurrent().navigate(FilterView.class);
+            UI.getCurrent().navigate(FilterLayout.class);
         });
 
         setStylesToSearchForm(formLayout, submitButton);
 
-        add(formLayout);
-
         provinceService.populateProvinceNameToSelect(selectProvince);
+
+        formLayout.add(selectProvince, datePickerFrom, datePickerTo, registeredCheckBox, submitButton);
 
         dataValidation.validateDates(datePickerFrom, datePickerTo);
         dataValidation.validateProvinceNameIsNotEmpty(selectProvince);
+
+        add(formLayout );
     }
 
 
@@ -61,7 +64,7 @@ public class SearchCarView extends Div {
         formLayout.getStyle().setMarginLeft("1rem");
         formLayout.getStyle().setMarginRight("1rem");
 
-        formLayout.add(selectProvince, datePickerFrom, datePickerTo, registeredCheckBox, button);
+
         formLayout.setColspan(button, 3);
         formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1),
                 new FormLayout.ResponsiveStep("500px", 3));

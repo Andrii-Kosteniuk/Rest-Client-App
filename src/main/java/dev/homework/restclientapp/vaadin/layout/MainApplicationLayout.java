@@ -9,10 +9,9 @@ import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.theme.lumo.LumoUtility;
-import dev.homework.restclientapp.vaadin.view.HomeView;
-import dev.homework.restclientapp.vaadin.view.SearchCarView;
+import dev.homework.restclientapp.vaadin.view.AboutView;
+import dev.homework.restclientapp.vaadin.view.ContactView;
 
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -37,18 +36,12 @@ public class MainApplicationLayout extends AppLayout {
     }
 
     private List<Tab> defineTabs() {
-        List<Tab> tabs = new ArrayList<>();
+        Tab homeTab = new Tab(new RouterLink("Home", HomeLayout.class));
+        Tab vehicleTab = new Tab(new RouterLink("Find Vehicles", SearchFormLayout.class));
+        Tab aboutTab = new Tab(new RouterLink("About", AboutView.class));
+        Tab contactTab = new Tab(new RouterLink("Contact", ContactView.class));
 
-        Tab homeTab = new Tab(new RouterLink("Home", HomeView.class));
-        Tab vehicleTab = new Tab(new RouterLink("Find Vehicles", SearchCarView.class));
-
-
-        tabs.add(homeTab);
-        tabs.add(vehicleTab);
-        tabs.add(new Tab("About"));
-        tabs.add(new Tab("Contact"));
-
-        return tabs;
+        return List.of(homeTab, vehicleTab, aboutTab, contactTab);
     }
 
     private void addNavbarContent() {
