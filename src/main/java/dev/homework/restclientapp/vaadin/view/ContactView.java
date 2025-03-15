@@ -11,30 +11,30 @@ import com.vaadin.flow.component.virtuallist.VirtualList;
 import com.vaadin.flow.data.renderer.ComponentRenderer;
 import com.vaadin.flow.dom.ElementFactory;
 import com.vaadin.flow.router.Route;
-import dev.homework.restclientapp.domain.Address;
-import dev.homework.restclientapp.domain.Author;
+import dev.homework.restclientapp.domain.Person;
 import dev.homework.restclientapp.vaadin.layout.MainApplicationLayout;
 
 @Route(value = "/contact", layout = MainApplicationLayout.class)
 public class ContactView extends Div {
 
     public ContactView() {
-        VirtualList<Author> list = new VirtualList<>();
-        Address address = new Address("53-437",
+        VirtualList<Person> list = new VirtualList<>();
+        Person.Address address = new Person.Address("53-437",
                 "Wrocław",
                 "Dolnośląskie");
-        Author authorInfo = new Author("Andrii",
+        Person person = new Person("Andrii",
                 "Kosteniuk",
                 "andriy.kosteniuk@gmail.com",
                 "(+48) 663-567-594", address);
-        list.setItems(authorInfo);
+        String authorFullName = person.getFirstName() + " " + person.getLastName();
+        list.setItems(person);
 
-        ComponentRenderer<Component, Author> authorCardRenderer = new ComponentRenderer<>(
-                author -> {
+        ComponentRenderer<Component, Person> authorCardRenderer = new ComponentRenderer<>(
+                auth -> {
                     HorizontalLayout cardLayout = new HorizontalLayout();
                     cardLayout.setMargin(true);
 
-                    String authorFullName = author.getFirstName() + " " + author.getLastName();
+
                     Avatar avatar = new Avatar(authorFullName);
                     avatar.setHeight("64px");
                     avatar.setWidth("64px");
@@ -47,10 +47,10 @@ public class ContactView extends Div {
                     VerticalLayout contactLayout = new VerticalLayout();
                     contactLayout.setSpacing(false);
                     contactLayout.setPadding(false);
-                    contactLayout.add(new Div(new Text(author.getEmail())));
-                    contactLayout.add(new Div(new Text(author.getAddress().getZip())));
-                    contactLayout.add(new Div(new Text(author.getAddress().getCity())));
-                    contactLayout.add(new Div(new Text(author.getAddress().getState())));
+                    contactLayout.add(new Div(new Text(person.getEmail())));
+                    contactLayout.add(new Div(new Text(person.getAddress().getZip())));
+                    contactLayout.add(new Div(new Text(person.getAddress().getCity())));
+                    contactLayout.add(new Div(new Text(person.getAddress().getState())));
 
 
                     infoLayout.add(new Details("Contact information", contactLayout));
