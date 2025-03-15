@@ -7,6 +7,6 @@ import lombok.Data;
 public class CepikResponse {
 
     @JsonProperty("data")
-    private CepikData data;
+    private ProvinceData data;
 
 }
