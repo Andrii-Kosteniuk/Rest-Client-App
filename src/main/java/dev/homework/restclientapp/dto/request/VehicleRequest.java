@@ -14,8 +14,11 @@ public class VehicleRequest {
     private String provinceName;
     private String dateFrom;
     private String dateTo;
+    private String typeOfDate;
     private boolean registered;
-    private int page;
-    private int limit;
+    private boolean showAllFields;
+    private String limit;
+    private String pageNo;
+
 }
 
