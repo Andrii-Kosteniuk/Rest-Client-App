@@ -53,11 +53,12 @@ public class ContactView extends Div {
                     contactLayout.add(new Div(new Text(person.getAddress().getState())));
 
 
-                    infoLayout.add(new Details("Contact information", contactLayout));
+                    infoLayout.add(new Details("Informacje kontaktowe", contactLayout));
 
                     cardLayout.add(avatar, infoLayout);
                     return cardLayout;
                 });
+
         list.setRenderer(authorCardRenderer);
         add(list);
     }
