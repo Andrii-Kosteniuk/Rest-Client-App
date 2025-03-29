@@ -1,21 +1,18 @@
 package dev.homework.restclientapp.service;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.select.Select;
-import com.vaadin.flow.server.Command;
 import dev.homework.restclientapp.dto.DataMapper;
 import dev.homework.restclientapp.dto.response.province.CepikResponse;
 import dev.homework.restclientapp.service.api.ProvinceApiService;
 import dev.homework.restclientapp.vaadin.notification.ErrorAndExceptionNotification;
+import io.netty.handler.timeout.ReadTimeoutException;
 import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.net.ConnectException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Objects;
@@ -24,7 +21,6 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class ProvinceService {
 
-    private final ErrorAndExceptionNotification errorAndExceptionNotification;
     Logger logger = LoggerFactory.getLogger(ProvinceService.class);
 
     private final ProvinceApiService provinceApiService;
@@ -42,17 +38,19 @@ public class ProvinceService {
     }
 
 
-    @CachePut(value = "provinces")
     public Map<String, String> getAllProvinceNamesWithKeys() {
         ResponseEntity<CepikResponse> response;
         try {
             response = provinceApiService.getCepikProvincesResponse();
             return dataMapper.mapToProvinceRecord(Objects.requireNonNull(response.getBody()));
-        } catch (ConnectException e) {
-            logger.error("Error while fetching data from API", e);
-            UI.getCurrent().access((Command) () -> errorAndExceptionNotification.showNotificationErrorIfTimeOutExceptionOccur(e));
+        } catch (ReadTimeoutException e) {
+            logger.error("Timeout error while fetching data from API", e);
+            ErrorAndExceptionNotification.showNotificationTimeOutExceptionOccur(e);
+        } catch (Exception e) {
+            logger.error("Unexpected error while fetching data from API", e);
+            ErrorAndExceptionNotification.showNotificationTimeOutExceptionOccur(e);
         }
-       return Collections.emptyMap();
+        return Collections.emptyMap();
     }
 
     @Cacheable("provinces")
