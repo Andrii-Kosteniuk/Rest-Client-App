@@ -1,4 +1,4 @@
-package dev.homework.restclientapp.vaadin.view;
+package dev.homework.restclientapp.vaadin.layout;
 
 import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
@@ -16,11 +16,12 @@ import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.textfield.TextFieldVariant;
 import com.vaadin.flow.data.value.ValueChangeMode;
 import com.vaadin.flow.router.Route;
+import dev.homework.restclientapp.dto.request.VehicleRequest;
 import dev.homework.restclientapp.dto.response.general.VehicleMainRecord;
 import dev.homework.restclientapp.service.VehicleService;
-import dev.homework.restclientapp.vaadin.layout.MainApplicationLayout;
-import dev.homework.restclientapp.vaadin.layout.PaginationLayout;
-import dev.homework.restclientapp.vaadin.layout.SearchFormLayout;
+import dev.homework.restclientapp.vaadin.notification.NoDataNotification;
+import dev.homework.restclientapp.vaadin.view.VehicleInformationView;
+import dev.homework.restclientapp.vaadin.view.VehicleView;
 
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -30,24 +31,25 @@ import java.util.function.Consumer;
 public class FilterLayout extends VerticalLayout {
     private final VehicleView vehicleView;
 
-    public FilterLayout(VehicleService vehicleService, VehicleInformationView vehicleInformationView) {
+    public FilterLayout(VehicleService vehicleService, VehicleInformationView vehicleInformationView, VehicleRequest vehicleRequest, SearchFormLayout searchFormLayout) {
         this.vehicleView = new VehicleView(vehicleService);
-        int page = vehicleService.getCurrentPage();
 
+        Button backButton = new Button("Powrót", new Icon(VaadinIcon.ARROW_LEFT),
+                event -> UI.getCurrent().navigate(SearchFormLayout.class));
+
+        GridListDataView<VehicleMainRecord> listOfData = vehicleView.getGridListData();
+        if (listOfData.getItemCount() == 0) {
+            NoDataNotification.showNoDataNotification();
+        }
+
+        VehicleFilter vehicleFilter = new VehicleFilter(listOfData);
+
+        addHeaderRow(vehicleView.getMarkColumn(), vehicleFilter, vehicleView.getModelColumn(), vehicleView.getYearColumn(), vehicleView.getRegistrationDate());
         Grid<VehicleMainRecord> vehicleMainRecordGrid = vehicleView.getVehicleMainRecordGrid();
 
         vehicleMainRecordGrid.setTooltipGenerator(info -> """
                 Kliknij prawym przyciskiem myszy, aby zobaczyć pełne informacje
                 """);
-
-
-        Button backButton = new Button("Back", new Icon(VaadinIcon.ARROW_LEFT),
-                event -> UI.getCurrent().navigate(SearchFormLayout.class));
-
-
-        VehicleFilter vehicleFilter = new VehicleFilter(vehicleView.getGridListData());
-
-        addHeaderRow(vehicleView.getMarkColumn(), vehicleFilter, vehicleView.getModelColumn(), vehicleView.getYearColumn(), vehicleView.getRegistrationDate());
 
         GridContextMenu<VehicleMainRecord> menu = vehicleMainRecordGrid.addContextMenu();
 
@@ -58,7 +60,8 @@ public class FilterLayout extends VerticalLayout {
                     vehicleInformationView.showDialogWithVehicleDetails(vehicleMainRecord.getId()));
         });
 
-        HorizontalLayout paginationControls = PaginationLayout.getPagesAndSize(vehicleService, page);
+
+        HorizontalLayout paginationControls = new PaginationLayout(vehicleRequest, vehicleService, searchFormLayout);
         paginationControls.setSizeFull();
 
         add(backButton, vehicleMainRecordGrid, paginationControls);
