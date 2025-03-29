@@ -14,7 +14,6 @@ import dev.homework.restclientapp.vaadin.view.ContactView;
 
 import java.util.List;
 
-
 public class MainApplicationLayout extends AppLayout {
 
     public MainApplicationLayout() {
@@ -29,17 +28,19 @@ public class MainApplicationLayout extends AppLayout {
         Tabs tabs = new Tabs();
 
         List<Tab> tabsList = defineTabs();
-        tabsList.forEach(tabs::add);
 
         tabs.setOrientation(Tabs.Orientation.VERTICAL);
+
+        tabsList.forEach(tabs::add);
+
         return tabs;
     }
 
     private List<Tab> defineTabs() {
-        Tab homeTab = new Tab(new RouterLink("Home", HomeLayout.class));
-        Tab vehicleTab = new Tab(new RouterLink("Find Vehicles", SearchFormLayout.class));
-        Tab aboutTab = new Tab(new RouterLink("About", AboutView.class));
-        Tab contactTab = new Tab(new RouterLink("Contact", ContactView.class));
+        Tab homeTab = new Tab(new RouterLink("Strona główna", HomeLayout.class));
+        Tab vehicleTab = new Tab(new RouterLink("Znajdź pojazdy", SearchFormLayout.class));
+        Tab aboutTab = new Tab(new RouterLink("Informacje o pobranych danych", AboutView.class));
+        Tab contactTab = new Tab(new RouterLink("Kontakt", ContactView.class));
 
         return List.of(homeTab, vehicleTab, aboutTab, contactTab);
     }
