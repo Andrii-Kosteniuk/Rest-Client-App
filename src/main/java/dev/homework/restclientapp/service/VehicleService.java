@@ -1,75 +1,94 @@
 package dev.homework.restclientapp.service;
 
+import com.vaadin.flow.component.UI;
 import dev.homework.restclientapp.dto.request.VehicleRequest;
 import dev.homework.restclientapp.dto.response.general.VehicleMainRecord;
 import dev.homework.restclientapp.service.api.VehicleApiService;
-import dev.homework.restclientapp.validation.DataValidation;
+import dev.homework.restclientapp.vaadin.layout.FilterLayout;
+import dev.homework.restclientapp.vaadin.layout.SearchFormLayout;
 import dev.homework.restclientapp.vaadin.notification.FormValidationNotification;
-import lombok.Getter;
+import dev.homework.restclientapp.validation.DataValidation;
+import lombok.Data;
 import lombok.RequiredArgsConstructor;
-import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-import static dev.homework.restclientapp.vaadin.layout.SearchFormLayout.*;
-
 @Service
+@Data
 @RequiredArgsConstructor
 public class VehicleService {
 
-    private static final Logger logger = LoggerFactory.getLogger(VehicleService.class);
     private final VehicleRequest vehicleRequest;
     private final VehicleApiService vehicleAPIService;
     private final DataValidation dataValidation;
     private final ProvinceService provinceService;
     private final FormValidationNotification formValidationNotification;
-    @Getter
-    private List<VehicleMainRecord> cachedData = new ArrayList<>();
-    @Getter
-    @Setter
-    private int currentPage = 1;
-    @Getter
-    @Setter
-    private int pageSize = 100;
 
-    @CacheEvict(value = "vehicles")
+    private Logger logger = LoggerFactory.getLogger(VehicleService.class);
+    private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
+    private List<VehicleMainRecord> cachedData = new ArrayList<>();
+    private int pageSize = 100;
+    private int pageNo = 1;
+
+    @CacheEvict(value = "vehicles", allEntries = true)
     public List<VehicleMainRecord> fetchDataFromApi() {
         logger.info("Fetching data from central API...");
         return vehicleAPIService.getVehiclesData(vehicleRequest);
     }
 
-
     public void submitForm() {
-        if (dataValidation.binder.isValid()) {
-            fillFormFieldsForSearchVehicles();
-            logger.info("Form  submitted and data is passed forward to VehicleRequest DTO");
-            this.cachedData = fetchDataFromApi();
-        } else {
-            formValidationNotification.showInvalidDateNotification();
-            logger.error("Form Validation Error");
-        }
+        logger.info("Form  submitted and data is passed forward to VehicleRequest DTO");
+        this.cachedData.clear();
+        this.cachedData = fetchDataFromApi();
+
+        UI.getCurrent().navigate(FilterLayout.class);
     }
 
-    public void fillFormFieldsForSearchVehicles() {
-        vehicleRequest.setProvinceName(provinceService.getProvinceKey(selectProvince.getValue()));
+    public void fillFormFieldsForSearchVehicles(SearchFormLayout form) {
+        vehicleRequest.setProvinceName(provinceService.getProvinceKey(form.getSelectProvince().getValue()));
+        vehicleRequest.setDateFrom(formatDate(form.getDatePickerFrom().getValue()));
+        vehicleRequest.setDateTo(formatDate(form.getDatePickerTo().getValue()));
+        vehicleRequest.setTypeOfDate(form.getTypeOfDate(form.getTypeOfDateComboBox().getValue()));
+        vehicleRequest.setRegistered(form.getRegisteredCheckBox().getValue());
+        vehicleRequest.setShowAllFields(form.getAllFieldsCheckBox().getValue());
+        vehicleRequest.setPageNo(String.valueOf(pageNo));
+        vehicleRequest.setLimit(String.valueOf(pageSize));
+        vehicleRequest.setShowAllFields(form.getAllFieldsCheckBox().getValue());
 
-        LocalDate dateFrom = datePickerFrom.getValue();
-        LocalDate dateTo = datePickerTo.getValue();
+        logger.info("Province name: {} --- Date from is: {} --- Date to is: {} --- Type of date is {}", vehicleRequest.getProvinceName(), vehicleRequest.getDateFrom(), vehicleRequest.getDateTo(), vehicleRequest.getTypeOfDate());
 
-        vehicleRequest.setDateFrom(DATE_FORMATTER.format(dateFrom));
-        vehicleRequest.setDateTo(DATE_FORMATTER.format(dateTo));
+        dataValidation.checkIfAllDateAreProvided(formValidationNotification);
+    }
 
-        boolean registeredCheckBoxValue = registeredCheckBox.getValue();
-        vehicleRequest.setRegistered(registeredCheckBoxValue);
+    private String formatDate(LocalDate date) {
+        return formatter.format(date);
+    }
 
-        vehicleRequest.setPage(currentPage);
-        vehicleRequest.setLimit(pageSize);
+    public void updatePageSize(int newPageSize) {
+        this.pageSize = newPageSize;
+        vehicleRequest.setLimit(String.valueOf(newPageSize));
+        submitForm();
+    }
+
+    public void navigateToNextPage() {
+        pageNo++;
+        vehicleRequest.setPageNo(String.valueOf(pageNo));
+        submitForm();
+    }
+
+    public void navigateToPreviousPage() {
+        if (pageNo > 1) {
+            pageNo--;
+            vehicleRequest.setPageNo(String.valueOf(pageNo));
+            submitForm();
+        }
 
     }
 
