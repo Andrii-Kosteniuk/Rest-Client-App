@@ -42,7 +42,7 @@ public class VehicleInformationView {
         addVehicleDetail(formLayout, "Powiat rejestracji:", vehicle.getRegistrationCounty());
         addVehicleDetail(formLayout, "Gmina rejestracji:", vehicle.getRegistrationDistrict());
 
-        logger.info("Data about {} is filled and returned", vehicle.getModel());
+        logger.info("Data about '{}' is filled and returned", vehicle.getMark());
     }
 
     private static void addVehicleDetail(FormLayout formLayout, String label, String value) {
