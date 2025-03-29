@@ -13,7 +13,7 @@ import java.util.List;
 
 @Component
 @Data
-class VehicleView {
+public class VehicleView {
     private Grid<VehicleMainRecord> vehicleMainRecordGrid;
     private GridListDataView<VehicleMainRecord> gridListData;
     private Grid.Column<VehicleMainRecord> markColumn;
