@@ -10,8 +10,6 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
-import java.net.ConnectException;
-
 @Service
 public class ProvinceApiService {
     private static final Logger logger = LoggerFactory.getLogger(ProvinceApiService.class);
@@ -28,14 +26,18 @@ public class ProvinceApiService {
 
     @Retryable(
             retryFor = {ReadTimeoutException.class},
-            backoff = @Backoff(maxDelay = 6000)
+            backoff = @Backoff(maxDelay = 5000)
     )
-    public ResponseEntity<CepikResponse> getCepikProvincesResponse() throws ConnectException {
+    public ResponseEntity<CepikResponse> getCepikProvincesResponse() {
         logger.info("Fetching API response from remote server...");
+        try {
         return restClient.get()
                 .uri(URI_PROVINCES)
                 .retrieve()
                 .toEntity(CepikResponse.class);
+    }catch (ReadTimeoutException e) {
+            logger.error("Error while fetching data from API", e);
+           throw e;
+        }
     }
-
 }
