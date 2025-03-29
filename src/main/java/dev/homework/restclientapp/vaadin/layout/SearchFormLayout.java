@@ -1,33 +1,54 @@
 package dev.homework.restclientapp.vaadin.layout;
 
-import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
+import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.select.Select;
+import com.vaadin.flow.data.provider.ListDataProvider;
 import com.vaadin.flow.router.Route;
 import dev.homework.restclientapp.service.ProvinceService;
 import dev.homework.restclientapp.service.VehicleService;
-import dev.homework.restclientapp.vaadin.view.FilterLayout;
+import dev.homework.restclientapp.vaadin.notification.FormValidationNotification;
 import dev.homework.restclientapp.validation.DataValidation;
+import lombok.Getter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 @Route(value = "/vehicles-search", layout = MainApplicationLayout.class)
+@Component
+@Scope("prototype")
+@Getter
 public class SearchFormLayout extends HorizontalLayout {
 
 
-    public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMdd");
-    public static Select<String> selectProvince = new Select<>();
-    public static DatePicker datePickerFrom = new DatePicker("Data od");
-    public static DatePicker datePickerTo = new DatePicker("Data do", LocalDate.now());
-    public static Checkbox registeredCheckBox = new Checkbox();
+    private static final Logger log = LoggerFactory.getLogger(SearchFormLayout.class);
+    private final Select<String> selectProvince = new Select<>();
+    private final DatePicker datePickerFrom = new DatePicker("Data od", LocalDate.now());
+    private final DatePicker datePickerTo = new DatePicker("Data do", LocalDate.now());
+    private final Checkbox registeredCheckBox = new Checkbox("Tylko zarejestrowane");
+    private final Checkbox allFieldsCheckBox = new Checkbox("Pokaz wszystkie pola");
+    private final ComboBox<String> typeOfDateComboBox = new ComboBox<>("Typ daty");
+    private final ListDataProvider<String> dataProvider;
+    private final ProvinceService provinceService;
+    private final VehicleService vehicleService;
+    private final FormValidationNotification formValidationNotification;
+    private final DataValidation dataValidation;
 
 
-    public SearchFormLayout(ProvinceService provinceService, DataValidation dataValidation, VehicleService vehicleService) {
+    public SearchFormLayout(DataValidation dataValidation, ProvinceService provinceService, FormValidationNotification formValidationNotification, VehicleService vehicleService) {
+        this.provinceService = provinceService;
+        this.vehicleService = vehicleService;
+        this.formValidationNotification = formValidationNotification;
+        this.dataValidation = dataValidation;
+
         FormLayout formLayout = new FormLayout();
         formLayout.setSizeFull();
 
@@ -39,23 +60,45 @@ public class SearchFormLayout extends HorizontalLayout {
                                     "Domyślną wartością jest data bieżąca");
 
         registeredCheckBox.setTooltipText("Mają zostać zwrócone dane tylko pojazdów zarejestrowanych");
-        registeredCheckBox.setLabel("Tylko zarejestrowane");
+
+        dataProvider = new ListDataProvider<>(
+                List.of("Data pierwszej rejestracji pojazdu w Polsce",
+                        "Data ostatniej rejestracji pojazdu w Polsce"));
+
+
+        typeOfDateComboBox.getStyle().setFontSize("14px");
+        typeOfDateComboBox.setPlaceholder("Wybierz typ daty...");
+
+        typeOfDateComboBox.setItems(dataProvider);
+        typeOfDateComboBox.setRequired(true);
+
 
         Button submitButton = new Button("Szukaj...", event -> {
+
+            vehicleService.fillFormFieldsForSearchVehicles(this);
+
             vehicleService.submitForm();
-            UI.getCurrent().navigate(FilterLayout.class);
+
         });
-
-        setStylesToSearchForm(formLayout, submitButton);
-
-        provinceService.populateProvinceNameToSelect(selectProvince);
-
-        formLayout.add(selectProvince, datePickerFrom, datePickerTo, registeredCheckBox, submitButton);
 
         dataValidation.validateDates(datePickerFrom, datePickerTo);
         dataValidation.validateProvinceNameIsNotEmpty(selectProvince);
+        dataValidation.validateDateTypeIsNotEmpty(typeOfDateComboBox);
 
-        add(formLayout );
+        setStylesToSearchForm(formLayout, submitButton);
+
+
+        formLayout.add(selectProvince,
+                datePickerFrom,
+                datePickerTo,
+                registeredCheckBox,
+                typeOfDateComboBox,
+                allFieldsCheckBox,
+                submitButton);
+
+        provinceService.populateProvinceNameToSelect(selectProvince);
+
+        add(formLayout);
     }
 
 
@@ -64,7 +107,6 @@ public class SearchFormLayout extends HorizontalLayout {
         formLayout.getStyle().setMarginLeft("1rem");
         formLayout.getStyle().setMarginRight("1rem");
 
-
         formLayout.setColspan(button, 3);
         formLayout.setResponsiveSteps(new FormLayout.ResponsiveStep("0", 1),
                 new FormLayout.ResponsiveStep("500px", 3));
@@ -72,5 +114,7 @@ public class SearchFormLayout extends HorizontalLayout {
         button.getStyle().setBorderBottom("1rem");
     }
 
-
+    public String getTypeOfDate(String typeOfDate) {
+        return typeOfDate.equals("Data pierwszej rejestracji pojazdu w Polsce") ? "1" : "2";
+    }
 }
