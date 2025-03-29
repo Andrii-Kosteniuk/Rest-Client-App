@@ -21,7 +21,15 @@ import java.util.Objects;
 @Service
 public class VehicleApiService {
     public final static String BASE_URL = "https://api.cepik.gov.pl/pojazdy";
-    public final static String CEPIK_API_VEHICLES_URL = "?wojewodztwo=%s&data-od=%s&data-do=%s&page=%d&limit=%d&tylko-zarejestrowane=%S";
+    public final static String CEPIK_API_VEHICLES_URL =
+            "?wojewodztwo=%s" +
+            "&data-od=%s" +
+            "&data-do=%s" +
+            "&typ-daty=%s" +
+            "&tylko-zarejestrowane=%s" +
+            "&pokaz-wszystkie-pola=%s" +
+            "&limit=%s" +
+            "&page=%s";
     private static final Logger logger = LoggerFactory.getLogger(VehicleApiService.class);
     private final RestClient restClient;
     private final DataMapper dataMapper;
@@ -36,18 +44,21 @@ public class VehicleApiService {
 
     public List<VehicleMainRecord> getVehiclesData(VehicleRequest vehicleRequest) {
 
-        final String uri = String.format(BASE_URL + CEPIK_API_VEHICLES_URL,
+        final String uri = String.format(CEPIK_API_VEHICLES_URL,
                 vehicleRequest.getProvinceName(),
                 vehicleRequest.getDateFrom(),
                 vehicleRequest.getDateTo(),
-                vehicleRequest.getPage(),
+                vehicleRequest.getTypeOfDate(),
+                vehicleRequest.isRegistered(),
+                vehicleRequest.isShowAllFields(),
                 vehicleRequest.getLimit(),
-                vehicleRequest.isRegistered());
+                vehicleRequest.getPageNo()
+        );
 
         logger.info("Fetching vehicles from API: {}{}", BASE_URL, uri);
 
         List<VehicleDataResponse> data = Objects.requireNonNull(restClient.get()
-                .uri(uri)
+                .uri(BASE_URL + uri)
                 .retrieve()
                 .toEntity(new ParameterizedTypeReference<VehicleResponse>() {
                 }).getBody()).getData();
