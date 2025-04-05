@@ -8,7 +8,7 @@ vehicles registered in Poland,
 using data from the CEPIK API.
 
 
-### 📜 Table of Contents
+## 📜 Table of Contents
 
 * [Features](#-features)
 * [Prerequisites](#prerequisites)
@@ -23,14 +23,20 @@ using data from the CEPIK API.
 - Responsive design using Vaadin
 - Structured error handling and logging
 
-### Prerequisites
+## Prerequisites
 - Java 17+
 - Maven
 - Internet access for CEPIK API calls
 
-### Steps
+## Steps
 
+Clone the Repository
+
+```
 git clone https://github.com/Andrii-Kosteniuk/Rest-Client-App
+```
+
+Run the Application
 
 ```bash
 mvn clean install
@@ -39,20 +45,16 @@ mvn clean install
 mvn spring-boot:run
 ```
 
-### 🛠 Technologies Used
+The application will start on http://localhost:8080
 
-- Spring Framework (Spring Boot, Spring MVC, Spring Data JPA, Spring Security)
-- Hibernate (JPA)
-- Thymeleaf (Frontend)
-- Bootstrap, HTML, CSS (UI)
-- PostgreSQL (Database)
+## 🛠 Technologies Used
+
+- Spring Framework (Spring Boot, RestClient)
+- Vaadin framework 
+- Jackson
 - Logging (SLF4J)
-- Excel File Export (Apache POI)
-- Exception Handling (ControllerAdvice)
 
-
-
-### 📸 Examples
+## 📸 Examples
 
 1.Home page
 ![Home-page](src/main/resources/static/images/Home-page.jpg)
