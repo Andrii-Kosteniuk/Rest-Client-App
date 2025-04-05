@@ -21,36 +21,58 @@ import dev.homework.restclientapp.dto.response.general.VehicleMainRecord;
 import dev.homework.restclientapp.service.VehicleService;
 import dev.homework.restclientapp.vaadin.notification.NoDataNotification;
 import dev.homework.restclientapp.vaadin.view.VehicleInformationView;
-import dev.homework.restclientapp.vaadin.view.VehicleView;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
 
 @Route(value = "/vehicles-filter", layout = MainApplicationLayout.class)
 public class FilterLayout extends VerticalLayout {
-    private final VehicleView vehicleView;
+    private final Grid<VehicleMainRecord> vehicleMainRecordGrid;
 
     public FilterLayout(VehicleService vehicleService, VehicleInformationView vehicleInformationView, VehicleRequest vehicleRequest, SearchFormLayout searchFormLayout) {
-        this.vehicleView = new VehicleView(vehicleService);
+        this.vehicleMainRecordGrid = new Grid<>();
+        Grid.Column<VehicleMainRecord> markColumn = vehicleMainRecordGrid.addColumn(VehicleMainRecord::getMarka).setSortable(true);
+        Grid.Column<VehicleMainRecord> modelColumn = vehicleMainRecordGrid.addColumn(VehicleMainRecord::getModel).setSortable(true);
+        Grid.Column<VehicleMainRecord> yearColumn = vehicleMainRecordGrid.addColumn(VehicleMainRecord::getRokProdukcji).setSortable(true);
+        Grid.Column<VehicleMainRecord> registrationDate = vehicleMainRecordGrid.addColumn(VehicleMainRecord::getDataPierwszejRejestracji).setSortable(true);
 
         Button backButton = new Button("Powrót", new Icon(VaadinIcon.ARROW_LEFT),
                 event -> UI.getCurrent().navigate(SearchFormLayout.class));
 
-        GridListDataView<VehicleMainRecord> listOfData = vehicleView.getGridListData();
+        List<VehicleMainRecord> vehicleMainRecords = vehicleService.getCachedData();
+
+        GridListDataView<VehicleMainRecord> listOfData = vehicleMainRecordGrid.setItems(vehicleMainRecords);
+
         if (listOfData.getItemCount() == 0) {
             NoDataNotification.showNoDataNotification();
         }
 
         VehicleFilter vehicleFilter = new VehicleFilter(listOfData);
 
-        addHeaderRow(vehicleView.getMarkColumn(), vehicleFilter, vehicleView.getModelColumn(), vehicleView.getYearColumn(), vehicleView.getRegistrationDate());
-        Grid<VehicleMainRecord> vehicleMainRecordGrid = vehicleView.getVehicleMainRecordGrid();
+
+        addHeaderRow(markColumn, vehicleFilter, modelColumn, yearColumn, registrationDate);
 
         vehicleMainRecordGrid.setTooltipGenerator(info -> """
                 Kliknij prawym przyciskiem myszy, aby zobaczyć pełne informacje
                 """);
 
+        addContextMenu(vehicleInformationView);
+
+
+        HorizontalLayout paginationControls = addPaginationControls(vehicleService, vehicleRequest, searchFormLayout);
+
+        add(backButton, vehicleMainRecordGrid, paginationControls);
+    }
+
+    private static HorizontalLayout addPaginationControls(VehicleService vehicleService, VehicleRequest vehicleRequest, SearchFormLayout searchFormLayout) {
+        HorizontalLayout paginationControls = new PaginationLayout(vehicleRequest, vehicleService, searchFormLayout);
+        paginationControls.setSizeFull();
+        return paginationControls;
+    }
+
+    private void addContextMenu(VehicleInformationView vehicleInformationView) {
         GridContextMenu<VehicleMainRecord> menu = vehicleMainRecordGrid.addContextMenu();
 
         menu.addItem("Zobacz szegółowe informacje", event -> {
@@ -59,12 +81,6 @@ public class FilterLayout extends VerticalLayout {
             selectedCar.ifPresent(vehicleMainRecord ->
                     vehicleInformationView.showDialogWithVehicleDetails(vehicleMainRecord.getId()));
         });
-
-
-        HorizontalLayout paginationControls = new PaginationLayout(vehicleRequest, vehicleService, searchFormLayout);
-        paginationControls.setSizeFull();
-
-        add(backButton, vehicleMainRecordGrid, paginationControls);
     }
 
     private static Component createFilterHeader(String labelText, Consumer<String> filter) {
@@ -88,7 +104,7 @@ public class FilterLayout extends VerticalLayout {
     }
 
     private void addHeaderRow(Grid.Column<VehicleMainRecord> markColumn, VehicleFilter vehicleFilter, Grid.Column<VehicleMainRecord> modelColumn, Grid.Column<VehicleMainRecord> yearColumn, Grid.Column<VehicleMainRecord> registrationDate) {
-        HeaderRow headerRow = vehicleView.getVehicleMainRecordGrid().appendHeaderRow();
+        HeaderRow headerRow = vehicleMainRecordGrid.appendHeaderRow();
 
         headerRow.getCell(markColumn).setComponent(
                 createFilterHeader("Marka", vehicleFilter::setMark));
