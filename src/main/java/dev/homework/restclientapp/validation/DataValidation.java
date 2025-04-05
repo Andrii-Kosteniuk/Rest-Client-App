@@ -5,12 +5,9 @@ import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.data.binder.Binder;
 import dev.homework.restclientapp.dto.request.VehicleRequest;
-import dev.homework.restclientapp.vaadin.notification.FormValidationNotification;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-
-import static org.reflections.Reflections.log;
 
 @Component
 public class DataValidation {
@@ -70,15 +67,5 @@ public class DataValidation {
         datePickerTo.addValueChangeListener(event -> binder.validate());
     }
 
-
-    public void checkIfAllDateAreProvided(FormValidationNotification formValidationNotification) {
-        if (! binder.isValid()) {
-            formValidationNotification.showInvalidDateNotification();
-
-            binder.validate().getValidationErrors().forEach(error ->
-                    log.error("Field error: {}", error.getErrorMessage())
-            );
-        }
-    }
 
 }
