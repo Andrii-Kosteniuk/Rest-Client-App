@@ -3,7 +3,6 @@ package dev.homework.restclientapp.vaadin.layout;
 import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.formlayout.FormLayout;
-import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.select.Select;
 import dev.homework.restclientapp.dto.request.VehicleRequest;
@@ -41,19 +40,20 @@ public class PaginationLayout extends HorizontalLayout {
     private HorizontalLayout createPaginationLayout() {
         Select<Integer> pageLimitSelect = new Select<>();
         pageLimitSelect.setItems(100, 200, 300, 400, 500);
-        pageLimitSelect.setValue(100);
-        pageLimitSelect.addValueChangeListener(event -> vehicleService.updatePageSize(event.getValue()));
+        pageLimitSelect.setValue(vehicleService.getPageSize());
+        pageLimitSelect.addValueChangeListener(
+                event -> vehicleService.updatePageSize((event.getValue())));
 
         FormLayout formLayout = new FormLayout();
+        Text numberOfRecords = new Text("Liczba rekordów: " + vehicleService.getCachedData().size());
+
         formLayout.addFormItem(pageLimitSelect, "Rozmiar");
+        formLayout.add(numberOfRecords);
         formLayout.setSizeFull();
 
-        Div numberOfRecords = new Div(
-                new Text("Liczba rekordów: " + vehicleService.getCachedData().size()));
-
-
-        HorizontalLayout paginationLayout = new HorizontalLayout(prevButton, nextButton, formLayout, numberOfRecords);
+        HorizontalLayout paginationLayout = new HorizontalLayout(prevButton, nextButton, formLayout);
         paginationLayout.setSizeFull();
+
         return paginationLayout;
     }
 
