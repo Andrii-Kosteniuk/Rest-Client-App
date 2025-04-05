@@ -12,28 +12,28 @@ import dev.homework.restclientapp.vaadin.component.CloseButtonComponent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ErrorAndExceptionNotification extends Div {
+public  class ErrorAndExceptionNotification extends Div {
 
     private static final Logger log = LoggerFactory.getLogger(ErrorAndExceptionNotification.class);
 
-    public static void showNotificationTimeOutExceptionOccur(Exception ex) {
+    public static void showNotificationException(Exception ex) {
         UI ui = UI.getCurrent();
         if (ui != null) {
             ui.access(() -> {
-                Notification errorTimeOutNotification = new Notification();
-                errorTimeOutNotification.addThemeVariants(NotificationVariant.LUMO_ERROR);
+                Notification errorNotification = new Notification();
+                errorNotification.addThemeVariants(NotificationVariant.LUMO_ERROR);
 
                 Div text = new Div(
                         new Paragraph(ex.getMessage()),
                         new Paragraph("Spróbuj przeładować stronę, proszę!"));
 
-                Button closeNotificationButton = CloseButtonComponent.closeNotification(errorTimeOutNotification);
+                Button closeNotificationButton = CloseButtonComponent.closeNotification(errorNotification);
                 HorizontalLayout layout = new HorizontalLayout(text, closeNotificationButton);
                 layout.setAlignItems(FlexComponent.Alignment.CENTER);
 
-                errorTimeOutNotification.add(layout);
+                errorNotification.add(layout);
 
-                errorTimeOutNotification.open();
+                errorNotification.open();
             });
         } else {
             log.error("UI instance is not available. Cannot show notification.");
