@@ -2,7 +2,6 @@ package dev.homework.restclientapp.service.api;
 
 import dev.homework.restclientapp.dto.DataMapper;
 import dev.homework.restclientapp.dto.request.VehicleRequest;
-import dev.homework.restclientapp.dto.response.general.VehicleDataResponse;
 import dev.homework.restclientapp.dto.response.general.VehicleMainRecord;
 import dev.homework.restclientapp.dto.response.general.VehicleResponse;
 import dev.homework.restclientapp.dto.response.singleVehicle.VehicleByIdRecord;
@@ -13,6 +12,7 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 
 import java.util.List;
@@ -34,7 +34,7 @@ public class VehicleApiService {
     private final RestClient restClient;
     private final DataMapper dataMapper;
 
-    public VehicleApiService(DataMapper dataMapper) {
+    public VehicleApiService(DataMapper dataMapper ) {
         this.dataMapper = dataMapper;
 
         restClient = RestClient.builder()
@@ -42,6 +42,7 @@ public class VehicleApiService {
                 .build();
     }
 
+    @CacheEvict(value = "vehicles", key = "#vehicleRequest.dateFrom")
     public List<VehicleMainRecord> getVehiclesData(VehicleRequest vehicleRequest) {
 
         final String uri = String.format(CEPIK_API_VEHICLES_URL,
@@ -57,13 +58,26 @@ public class VehicleApiService {
 
         logger.info("Fetching vehicles from API: {}{}", BASE_URL, uri);
 
-        List<VehicleDataResponse> data = Objects.requireNonNull(restClient.get()
-                .uri(BASE_URL + uri)
-                .retrieve()
-                .toEntity(new ParameterizedTypeReference<VehicleResponse>() {
-                }).getBody()).getData();
+        try {
+            ResponseEntity<VehicleResponse> response = restClient.get()
+                    .uri(BASE_URL + uri)
+                    .retrieve()
+                    .toEntity(new ParameterizedTypeReference<>() {});
 
-        return dataMapper.mapToVehicleMainInfo(data);
+            if (response.getBody() == null || response.getBody().getData() == null) {
+                logger.error("Received null response from API");
+                return List.of();
+            }
+
+            return dataMapper.mapToVehicleMainInfo(response.getBody().getData());
+
+        } catch (ResourceAccessException e) {
+            logger.error("Error accessing API: {}{}", BASE_URL, uri, e);
+            return List.of();
+        } catch (Exception e) {
+            logger.error("Unexpected error while fetching data: {}", e.getMessage(), e);
+            return List.of();
+        }
 
     }
 
@@ -84,4 +98,5 @@ public class VehicleApiService {
         return dataMapper.mapToVehicleDetails(Objects.requireNonNull(response.getBody()));
 
     }
+
 }
