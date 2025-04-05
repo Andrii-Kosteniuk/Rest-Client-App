@@ -6,13 +6,10 @@ import dev.homework.restclientapp.dto.response.general.VehicleMainRecord;
 import dev.homework.restclientapp.service.api.VehicleApiService;
 import dev.homework.restclientapp.vaadin.layout.FilterLayout;
 import dev.homework.restclientapp.vaadin.layout.SearchFormLayout;
-import dev.homework.restclientapp.vaadin.notification.FormValidationNotification;
 import dev.homework.restclientapp.validation.DataValidation;
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -22,32 +19,36 @@ import java.util.List;
 
 @Service
 @Data
-@RequiredArgsConstructor
 public class VehicleService {
 
     private final VehicleRequest vehicleRequest;
     private final VehicleApiService vehicleAPIService;
     private final DataValidation dataValidation;
     private final ProvinceService provinceService;
-    private final FormValidationNotification formValidationNotification;
-
     private Logger logger = LoggerFactory.getLogger(VehicleService.class);
     private DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
-    private List<VehicleMainRecord> cachedData = new ArrayList<>();
+    private List<VehicleMainRecord> cachedData;
     private int pageSize = 100;
     private int pageNo = 1;
 
-    @CacheEvict(value = "vehicles", allEntries = true)
+    public VehicleService(VehicleRequest vehicleRequest, VehicleApiService vehicleAPIService, DataValidation dataValidation, ProvinceService provinceService) {
+        this.vehicleRequest = vehicleRequest;
+        this.vehicleAPIService = vehicleAPIService;
+        this.dataValidation = dataValidation;
+        this.provinceService = provinceService;
+        this.cachedData = new ArrayList<>();
+    }
+
     public List<VehicleMainRecord> fetchDataFromApi() {
         logger.info("Fetching data from central API...");
-        return vehicleAPIService.getVehiclesData(vehicleRequest);
+       return vehicleAPIService.getVehiclesData(vehicleRequest);
     }
 
     public void submitForm() {
-        logger.info("Form  submitted and data is passed forward to VehicleRequest DTO");
-        this.cachedData.clear();
-        this.cachedData = fetchDataFromApi();
+        cachedData.clear();
+        cachedData = fetchDataFromApi();
 
+        logger.info("Form  submitted and data is passed forward to VehicleRequest DTO");
         UI.getCurrent().navigate(FilterLayout.class);
     }
 
@@ -64,7 +65,6 @@ public class VehicleService {
 
         logger.info("Province name: {} --- Date from is: {} --- Date to is: {} --- Type of date is {}", vehicleRequest.getProvinceName(), vehicleRequest.getDateFrom(), vehicleRequest.getDateTo(), vehicleRequest.getTypeOfDate());
 
-        dataValidation.checkIfAllDateAreProvided(formValidationNotification);
     }
 
     private String formatDate(LocalDate date) {
@@ -74,13 +74,19 @@ public class VehicleService {
     public void updatePageSize(int newPageSize) {
         this.pageSize = newPageSize;
         vehicleRequest.setLimit(String.valueOf(newPageSize));
+        logger.info("Updated page size to: {} and fetched new data", newPageSize);
         submitForm();
+
+        UI.getCurrent().access(() -> UI.getCurrent().getPage().reload());
+
     }
 
     public void navigateToNextPage() {
         pageNo++;
         vehicleRequest.setPageNo(String.valueOf(pageNo));
         submitForm();
+        UI.getCurrent().access(() -> UI.getCurrent().getPage().reload());
+
     }
 
     public void navigateToPreviousPage() {
@@ -88,6 +94,7 @@ public class VehicleService {
             pageNo--;
             vehicleRequest.setPageNo(String.valueOf(pageNo));
             submitForm();
+            UI.getCurrent().access(() -> UI.getCurrent().getPage().reload());
         }
 
     }
