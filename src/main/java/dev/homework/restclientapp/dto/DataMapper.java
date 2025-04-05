@@ -7,6 +7,7 @@ import dev.homework.restclientapp.dto.response.province.CepikResponse;
 import dev.homework.restclientapp.dto.response.province.ProvinceRecord;
 import dev.homework.restclientapp.dto.response.singleVehicle.VehicleByIdRecord;
 import dev.homework.restclientapp.dto.response.singleVehicle.VehicleByIdResponse;
+import lombok.Getter;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -14,8 +15,10 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+@Getter
 @Component
 public class DataMapper {
+    private List<ProvinceRecord> provinceRecords;
 
     public VehicleByIdRecord mapToVehicleDetails(VehicleByIdResponse vehicleByIdResponse) {
 
@@ -75,7 +78,8 @@ public class DataMapper {
 
     public Map<String, String> mapToProvinceRecord(CepikResponse response) {
 
-        List<ProvinceRecord> provinceRecords = response.getData().getAttributes().getProvinceRecords();
+        provinceRecords = response.getData().getAttributes().getProvinceRecords();
+
         return provinceRecords
                 .stream()
                 .collect(Collectors.toMap(
