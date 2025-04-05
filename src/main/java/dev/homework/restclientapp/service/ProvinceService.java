@@ -37,7 +37,6 @@ public class ProvinceService {
                 .findFirst().orElse("XX");
     }
 
-
     public Map<String, String> getAllProvinceNamesWithKeys() {
         ResponseEntity<CepikResponse> response;
         try {
@@ -45,15 +44,14 @@ public class ProvinceService {
             return dataMapper.mapToProvinceRecord(Objects.requireNonNull(response.getBody()));
         } catch (ReadTimeoutException e) {
             logger.error("Timeout error while fetching data from API", e);
-            ErrorAndExceptionNotification.showNotificationTimeOutExceptionOccur(e);
+            ErrorAndExceptionNotification.showNotificationException(e);
         } catch (Exception e) {
             logger.error("Unexpected error while fetching data from API", e);
-            ErrorAndExceptionNotification.showNotificationTimeOutExceptionOccur(e);
+            ErrorAndExceptionNotification.showNotificationException(e);
         }
         return Collections.emptyMap();
     }
 
-    @Cacheable("provinces")
     public void populateProvinceNameToSelect(Select<String> selectProvince) {
         selectProvince.setItems(getAllProvinceNamesWithKeys().keySet());
     }

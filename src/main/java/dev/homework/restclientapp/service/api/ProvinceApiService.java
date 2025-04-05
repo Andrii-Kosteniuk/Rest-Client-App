@@ -17,7 +17,6 @@ public class ProvinceApiService {
     public final String URI_PROVINCES = "";
     private final RestClient restClient;
 
-
     public ProvinceApiService() {
         restClient = RestClient.builder()
                 .baseUrl(BASE_URL)
@@ -28,6 +27,7 @@ public class ProvinceApiService {
             retryFor = {ReadTimeoutException.class},
             backoff = @Backoff(maxDelay = 5000)
     )
+
     public ResponseEntity<CepikResponse> getCepikProvincesResponse() {
         logger.info("Fetching API response from remote server...");
         try {
